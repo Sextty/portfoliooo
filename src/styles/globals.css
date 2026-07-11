@@ -1,0 +1,202 @@
+/* ─── Global Reset & Typography ──────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body { font-family: 'DM Sans', sans-serif; background: #060912; }
+h1, h2, h3, h4, h5 { font-family: 'Sora', sans-serif; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ─── Custom Scrollbar ───────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.35); border-radius: 2px; }
+
+/* ─── Keyframe Animations ────────────────────────────────── */
+@keyframes terminal-float {
+  0%, 100% { transform: translateY(0px); }
+  33%      { transform: translateY(-18px); }
+  66%      { transform: translateY(8px); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes bounce-arrow {
+  0%, 100% { transform: translateY(0);   opacity: 1; }
+  50%      { transform: translateY(9px); opacity: 0.4; }
+}
+
+@keyframes particle {
+  0%   { transform: translateY(0)    translateX(0)    scale(1);   opacity: 0.5; }
+  33%  { transform: translateY(-28px) translateX(14px) scale(1.3); opacity: 1; }
+  66%  { transform: translateY(-8px)  translateX(-18px) scale(0.8); opacity: 0.3; }
+  100% { transform: translateY(0)    translateX(0)    scale(1);   opacity: 0.5; }
+}
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%     { opacity: 1;   transform: scale(1.06); }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}
+
+@keyframes nav-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.08); }
+  50%     { box-shadow: 0 0 30px rgba(99,102,241,0.18); }
+}
+
+@keyframes gb-marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ─── Animation Utility Classes ──────────────────────────── */
+.bounce-anim { animation: bounce-arrow 2.2s ease-in-out infinite; }
+
+/* ─── Shimmer Gradient Text ──────────────────────────────── */
+.shimmer-text {
+  background: linear-gradient(90deg, #6366f1, #34d399, #818cf8, #34d399, #6366f1);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4.5s linear infinite;
+}
+
+/* ─── Glassmorphism ──────────────────────────────────────── */
+.glass {
+  background: rgba(12,18,32,0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(99,102,241,0.13);
+}
+
+.glass-em {
+  background: rgba(12,18,32,0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(16,185,129,0.18);
+}
+
+/* ─── Tilt Card with 3D Perspective ──────────────────────── */
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(.03,.98,.52,.99),
+              box-shadow 0.35s ease;
+  will-change: transform;
+}
+
+.tilt-card:hover {
+  box-shadow: 0 24px 64px rgba(99,102,241,0.18),
+              0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ─── Card Shine Effect ──────────────────────────────────── */
+.card-shine {
+  position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(circle at var(--mx,50%) var(--my,50%),
+    rgba(99,102,241,0.18) 0%, transparent 62%);
+  opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+}
+
+.tilt-card:hover .card-shine { opacity: 1; }
+
+/* ─── Glow Inputs ────────────────────────────────────────── */
+.glow-input {
+  background: rgba(9,14,28,0.7);
+  border: 1px solid rgba(99,102,241,0.22);
+  color: #e8ecf4;
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  outline: none;
+}
+
+.glow-input::placeholder { color: #4a5568; }
+
+.glow-input:focus {
+  border-color: rgba(99,102,241,0.75);
+  box-shadow: 0 0 0 1px rgba(99,102,241,0.28),
+              0 0 24px rgba(99,102,241,0.12);
+}
+
+.glow-input-em:focus {
+  border-color: rgba(16,185,129,0.75);
+  box-shadow: 0 0 0 1px rgba(16,185,129,0.25),
+              0 0 24px rgba(16,185,129,0.10);
+}
+
+/* ─── Dot Grid Background ───────────────────────────────── */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(99,102,241,0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* ─── Gradient Line Separator ────────────────────────────── */
+.gradient-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.5), rgba(16,185,129,0.5), transparent);
+}
+
+/* ─── Tech Card Hover Effects ────────────────────────────── */
+.tech-hover {
+  transition: transform 0.35s cubic-bezier(.03,.98,.52,.99),
+              box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.tech-hover:hover {
+  transform: perspective(600px) rotateY(6deg) rotateX(-4deg) scale(1.03);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(99,102,241,0.1);
+  border-color: rgba(99,102,241,0.35) !important;
+}
+
+.em-hover:hover {
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(16,185,129,0.12);
+  border-color: rgba(16,185,129,0.4) !important;
+}
+
+/* ─── Buttons ────────────────────────────────────────────── */
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+  position: relative; overflow: hidden;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(99,102,241,0.45);
+  filter: brightness(1.1);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(99,102,241,0.35);
+  color: #818cf8;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.btn-ghost:hover {
+  border-color: rgba(99,102,241,0.8);
+  background: rgba(99,102,241,0.08);
+  transform: translateY(-2px);
+}
+
+/* ─── Section Tag ────────────────────────────────────────── */
+.section-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #6366f1;
+}
