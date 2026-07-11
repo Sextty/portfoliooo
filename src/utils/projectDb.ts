@@ -13,7 +13,11 @@ export interface Project {
   year: string;
 }
 
-const STORAGE_KEY = "wassim_portfolio_projects_v2";
+// Bumped from v2 -> v3: forces every browser (including yours) to drop any
+// stale cached project list and load the corrected DEFAULT_PROJECTS below.
+// Bump this again any time you edit DEFAULT_PROJECTS and want visitors who
+// already loaded the site to see the change instead of their old cached copy.
+const STORAGE_KEY = "wassim_portfolio_projects_v3";
 
 const DEFAULT_PROJECTS: Project[] = [
   {
@@ -38,7 +42,11 @@ const DEFAULT_PROJECTS: Project[] = [
     featured: true,
     color: "#10b981",
     year: "2024",
-    runUrl: "LIVE_URL_HERE",
+    // No live deployment yet — leave empty so the "Live Demo" button
+    // simply doesn't render (see ProjectCard: {project.runUrl && (...)}).
+    // Fill this in with the real deployed URL once it exists, e.g.
+    // "https://devpulse.vercel.app" or "/devpulse" if served internally.
+    runUrl: "",
     githubUrl: "https://github.com/Sextty/devpulse",
     videoUrl: ""
   },
@@ -51,7 +59,7 @@ const DEFAULT_PROJECTS: Project[] = [
     featured: true,
     color: "#8b5cf6",
     year: "2023",
-    runUrl: "LIVE_URL_HERE",
+    runUrl: "",
     githubUrl: "https://github.com/Sextty/chatflow-ai",
     videoUrl: ""
   },
@@ -64,7 +72,7 @@ const DEFAULT_PROJECTS: Project[] = [
     featured: false,
     color: "#f59e0b",
     year: "2023",
-    runUrl: "LIVE_URL_HERE",
+    runUrl: "",
     githubUrl: "https://github.com/Sextty/cloudvault",
     videoUrl: ""
   }
