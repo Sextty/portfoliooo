@@ -7,6 +7,7 @@ export interface Project {
   image?: string; // Base64 or URL
   runUrl?: string;
   githubUrl?: string;
+  videoUrl?: string; // Path/URL to local or external demo video
   featured: boolean;
   color: string;
   year: string;
@@ -25,7 +26,8 @@ const DEFAULT_PROJECTS: Project[] = [
     color: "#ec4899",
     year: "2025",
     runUrl: "/girls-boutique",
-    githubUrl: "https://github.com/Sextty/girls-boutique"
+    githubUrl: "https://github.com/Sextty/girls-boutique",
+    videoUrl: ""
   },
   {
     id: "devpulse",
@@ -36,8 +38,9 @@ const DEFAULT_PROJECTS: Project[] = [
     featured: true,
     color: "#10b981",
     year: "2024",
-    runUrl: "https://devpulse.demo",
-    githubUrl: "https://github.com/Sextty/devpulse"
+    runUrl: "LIVE_URL_HERE",
+    githubUrl: "https://github.com/Sextty/devpulse",
+    videoUrl: ""
   },
   {
     id: "chatflow-ai",
@@ -48,8 +51,9 @@ const DEFAULT_PROJECTS: Project[] = [
     featured: true,
     color: "#8b5cf6",
     year: "2023",
-    runUrl: "https://chatflow.demo",
-    githubUrl: "https://github.com/Sextty/chatflow-ai"
+    runUrl: "LIVE_URL_HERE",
+    githubUrl: "https://github.com/Sextty/chatflow-ai",
+    videoUrl: ""
   },
   {
     id: "cloudvault",
@@ -60,8 +64,9 @@ const DEFAULT_PROJECTS: Project[] = [
     featured: false,
     color: "#f59e0b",
     year: "2023",
-    runUrl: "https://cloudvault.demo",
-    githubUrl: "https://github.com/Sextty/cloudvault"
+    runUrl: "LIVE_URL_HERE",
+    githubUrl: "https://github.com/Sextty/cloudvault",
+    videoUrl: ""
   }
 ];
 

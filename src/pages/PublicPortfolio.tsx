@@ -9,6 +9,7 @@ import { CodeTerminal } from "@/components/CodeTerminal";
 import { useActiveSection } from "@/utils/useActiveSection";
 import profilePhoto from "@/assets/profile.jpg";
 import { getProjects, Project } from "@/utils/projectDb";
+import { VideoModal } from "@/components/VideoModal";
 import {
   Github,
   ExternalLink,
@@ -627,11 +628,39 @@ function AboutSection() {
 function ProjectCard({
   project,
   index,
+  onWatchDemo,
 }: {
   project: Project;
   index: number;
+  onWatchDemo: (src: string, title: string, color?: string) => void;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const [hasDbVideo, setHasDbVideo] = useState(false);
+  const [dbVideoUrl, setDbVideoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const checkVideo = async () => {
+      try {
+        const { getVideo } = await import("@/utils/videoDb");
+        const blob = await getVideo(project.id);
+        if (blob && active) {
+          setHasDbVideo(true);
+          const url = URL.createObjectURL(blob);
+          setDbVideoUrl(url);
+        }
+      } catch (e) {
+        console.error("IndexedDB error", e);
+      }
+    };
+    checkVideo();
+    return () => {
+      active = false;
+      if (dbVideoUrl) {
+        URL.revokeObjectURL(dbVideoUrl);
+      }
+    };
+  }, [project.id]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = cardRef.current;
@@ -704,17 +733,27 @@ function ProjectCard({
                   {project.year}
                 </span>
               </div>
-              <h3
-                style={{
-                  fontFamily: "'Sora', sans-serif",
-                  fontWeight: 700,
-                  fontSize: "1.2rem",
-                  color: "#e8ecf4",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                {project.title}
-              </h3>
+              <Link to={`/project/${project.id}`} style={{ textDecoration: "none" }}>
+                <h3
+                  style={{
+                    fontFamily: "'Sora', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "1.2rem",
+                    color: "#e8ecf4",
+                    letterSpacing: "-0.02em",
+                    cursor: "pointer",
+                    transition: "color 0.25s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = project.color;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "#e8ecf4";
+                  }}
+                >
+                  {project.title}
+                </h3>
+              </Link>
               <p
                 style={{
                   fontSize: 12,
@@ -726,7 +765,7 @@ function ProjectCard({
               </p>
             </div>
 
-            <div className="flex gap-2 mt-1">
+            <div className="flex gap-2 mt-1" onClick={(e) => e.stopPropagation()}>
               {project.githubUrl && (
                 <a
                   href={project.githubUrl}
@@ -755,11 +794,44 @@ function ProjectCard({
                     (e.currentTarget as HTMLAnchorElement).style.background =
                       "rgba(255,255,255,0.04)";
                   }}
+                  title="View Source Code"
                 >
                   <Github size={15} />
                 </a>
               )}
-              {(() => {
+
+              {(project.videoUrl || hasDbVideo) && (
+                <button
+                  onClick={() => onWatchDemo(dbVideoUrl || project.videoUrl!, project.title, project.color)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 34,
+                    height: 34,
+                    borderRadius: 10,
+                    background: `${project.color}15`,
+                    border: `1px solid ${project.color}30`,
+                    color: project.color,
+                    cursor: "pointer",
+                    transition: "background 0.25s, box-shadow 0.25s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = `${project.color}28`;
+                    e.currentTarget.style.boxShadow = `0 0 16px ${project.color}30`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = `${project.color}15`;
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                  title="Watch Demo Video"
+                >
+                  <Play size={15} fill="currentColor" />
+                </button>
+              )}
+
+              {project.runUrl && (() => {
+                const isInternal = project.runUrl.startsWith("/");
                 const btnStyle = {
                   display: "flex" as const,
                   alignItems: "center" as const,
@@ -767,24 +839,28 @@ function ProjectCard({
                   width: 34,
                   height: 34,
                   borderRadius: 10,
-                  background: `${project.color}15`,
-                  border: `1px solid ${project.color}30`,
-                  color: project.color,
-                  transition: "background 0.25s, box-shadow 0.25s",
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "#64748b",
+                  transition: "color 0.25s, background 0.25s",
                   textDecoration: "none" as const,
                 };
                 const hoverEnter = (e: any) => {
-                  e.currentTarget.style.background = `${project.color}28`;
-                  e.currentTarget.style.boxShadow = `0 0 16px ${project.color}30`;
+                  e.currentTarget.style.color = "#e8ecf4";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
                 };
                 const hoverLeave = (e: any) => {
-                  e.currentTarget.style.background = `${project.color}15`;
-                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.color = "#64748b";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.04)";
                 };
-                return (
-                  <Link to={`/project/${project.id}`} style={btnStyle} onMouseEnter={hoverEnter} onMouseLeave={hoverLeave}>
-                    <Play size={15} />
+                return isInternal ? (
+                  <Link to={project.runUrl} style={btnStyle} onMouseEnter={hoverEnter} onMouseLeave={hoverLeave} title="Live Demo">
+                    <ExternalLink size={15} />
                   </Link>
+                ) : (
+                  <a href={project.runUrl} target="_blank" rel="noreferrer" style={btnStyle} onMouseEnter={hoverEnter} onMouseLeave={hoverLeave} title="Live Demo">
+                    <ExternalLink size={15} />
+                  </a>
                 );
               })()}
             </div>
@@ -829,7 +905,11 @@ function ProjectCard({
 }
 
 /* ─── Projects ───────────────────────────────────────────── */
-function ProjectsSection() {
+function ProjectsSection({
+  onWatchDemo,
+}: {
+  onWatchDemo: (src: string, title: string, color?: string) => void;
+}) {
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
 
   useEffect(() => {
@@ -896,7 +976,7 @@ function ProjectsSection() {
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {featuredProjects.map((p, i) => (
-              <ProjectCard key={p.id} project={p} index={i} />
+              <ProjectCard key={p.id} project={p} index={i} onWatchDemo={onWatchDemo} />
             ))}
           </div>
         )}
@@ -1346,6 +1426,7 @@ function Footer() {
 export default function PublicPortfolio() {
   const [scrolled, setScrolled] = useState(false);
   const activeSection = useActiveSection(["about", "projects", "contact"]);
+  const [playingVideo, setPlayingVideo] = useState<{ src: string; title: string; color?: string } | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -1367,7 +1448,7 @@ export default function PublicPortfolio() {
         </SectionEntrance>
         <SectionDivider />
         <SectionEntrance delay={0.1}>
-          <ProjectsSection />
+          <ProjectsSection onWatchDemo={(src, title, color) => setPlayingVideo({ src, title, color })} />
         </SectionEntrance>
         <SectionDivider />
         <SectionEntrance delay={0.2}>
@@ -1375,6 +1456,14 @@ export default function PublicPortfolio() {
         </SectionEntrance>
       </main>
       <Footer />
+
+      <VideoModal
+        isOpen={!!playingVideo}
+        onClose={() => setPlayingVideo(null)}
+        videoSrc={playingVideo?.src || ""}
+        projectTitle={playingVideo?.title || ""}
+        projectColor={playingVideo?.color}
+      />
     </div>
   );
 }

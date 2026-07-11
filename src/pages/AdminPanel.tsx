@@ -46,12 +46,15 @@ export default function AdminPanel() {
     image: "",
     runUrl: "",
     githubUrl: "",
+    videoUrl: "",
     featured: false,
     color: "#6366f1",
     year: new Date().getFullYear().toString(),
   });
 
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [dbVideoStatus, setDbVideoStatus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     // Check local storage for auth state
@@ -61,6 +64,26 @@ export default function AdminPanel() {
       setProjects(getProjects());
     }
   }, []);
+
+  // Sync check for IndexedDB video files whenever projects change
+  useEffect(() => {
+    const checkDbVideos = async () => {
+      try {
+        const { getVideo } = await import("@/utils/videoDb");
+        const statusMap: Record<string, boolean> = {};
+        for (const p of projects) {
+          const blob = await getVideo(p.id);
+          statusMap[p.id] = !!blob;
+        }
+        setDbVideoStatus(statusMap);
+      } catch (err) {
+        console.error("Error checking video DB", err);
+      }
+    };
+    if (projects.length > 0) {
+      checkDbVideos();
+    }
+  }, [projects]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,6 +127,27 @@ export default function AdminPanel() {
     }
   };
 
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setVideoFile(file);
+    }
+  };
+
+  const handleRemoveDbVideo = async () => {
+    if (!editingId) return;
+    if (confirm("Are you sure you want to remove the uploaded video for this project?")) {
+      try {
+        const { deleteVideo } = await import("@/utils/videoDb");
+        await deleteVideo(editingId);
+        setDbVideoStatus((prev) => ({ ...prev, [editingId]: false }));
+        alert("Video file removed successfully.");
+      } catch (err) {
+        console.error("Error removing video", err);
+      }
+    }
+  };
+
   const openAddForm = () => {
     setEditingId(null);
     setFormData({
@@ -114,10 +158,12 @@ export default function AdminPanel() {
       image: "",
       runUrl: "",
       githubUrl: "",
+      videoUrl: "",
       featured: false,
       color: "#6366f1",
       year: new Date().getFullYear().toString(),
     });
+    setVideoFile(null);
     setIsFormOpen(true);
   };
 
@@ -129,16 +175,18 @@ export default function AdminPanel() {
       description: project.description,
       tags: project.tags.join(", "),
       image: project.image || "",
-      runUrl: project.runUrl,
-      githubUrl: project.githubUrl,
+      runUrl: project.runUrl || "",
+      githubUrl: project.githubUrl || "",
+      videoUrl: project.videoUrl || "",
       featured: project.featured,
       color: project.color || "#6366f1",
       year: project.year || new Date().getFullYear().toString(),
     });
+    setVideoFile(null);
     setIsFormOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const tagsArray = formData.tags
@@ -154,24 +202,43 @@ export default function AdminPanel() {
       image: formData.image,
       runUrl: formData.runUrl,
       githubUrl: formData.githubUrl,
+      videoUrl: formData.videoUrl,
       featured: formData.featured,
       color: formData.color,
       year: formData.year,
     };
 
+    let projectId = editingId;
     if (editingId) {
       updateProject(editingId, projectPayload);
     } else {
-      addProject(projectPayload);
+      const newProj = addProject(projectPayload);
+      projectId = newProj.id;
+    }
+
+    if (videoFile && projectId) {
+      try {
+        const { saveVideo } = await import("@/utils/videoDb");
+        await saveVideo(projectId, videoFile);
+      } catch (err) {
+        console.error("Error saving video file to IndexedDB", err);
+      }
     }
 
     setProjects(getProjects());
     setIsFormOpen(false);
+    setVideoFile(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this project?")) {
       deleteProject(id);
+      try {
+        const { deleteVideo } = await import("@/utils/videoDb");
+        await deleteVideo(id);
+      } catch (err) {
+        console.error("Error deleting video", err);
+      }
       setProjects(getProjects());
     }
   };
@@ -625,6 +692,68 @@ export default function AdminPanel() {
                   )}
                 </div>
 
+                {/* Video Section */}
+                <div className="border border-border rounded-xl p-5 bg-card/30 flex flex-col gap-4">
+                  <div className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                    PROJECT DEMO VIDEO (UPLOAD FILE TO INDEXEDDB OR PASTE ONLINE URL)
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-5">
+                    <div className="flex flex-col gap-2">
+                      <label style={{ fontSize: 12, color: "#64748b" }}>
+                        Upload Local MP4/WebM File
+                      </label>
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm"
+                        onChange={handleVideoUpload}
+                        className="block w-full text-sm text-slate-500
+                          file:mr-4 file:py-2 file:px-4
+                          file:rounded-xl file:border-0
+                          file:text-sm file:font-semibold
+                          file:bg-primary/10 file:text-primary
+                          hover:file:bg-primary/20
+                          cursor-pointer"
+                      />
+                      {videoFile && (
+                        <span style={{ fontSize: 11, color: "#10b981" }} className="mono">
+                          ✓ File selected: {videoFile.name}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label style={{ fontSize: 12, color: "#64748b" }}>
+                        Paste Video URL / Local Asset Path
+                      </label>
+                      <input
+                        name="videoUrl"
+                        value={formData.videoUrl}
+                        onChange={handleInputChange}
+                        placeholder="e.g. /videos/devpulse.mp4 or https://site..."
+                        className="glow-input w-full px-4 py-2.5 rounded-xl"
+                      />
+                    </div>
+                  </div>
+
+                  {editingId && (dbVideoStatus[editingId] || videoFile) && (
+                    <div className="mt-1 flex items-center justify-between bg-black/20 p-3 rounded-lg border border-border/40">
+                      <div className="flex items-center gap-2">
+                        <span style={{ fontSize: 12, color: "#10b981" }} className="mono">
+                          🎥 Stored video file exists in IndexedDB
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveDbVideo}
+                        className="text-xs text-destructive hover:underline bg-transparent border-0 cursor-pointer"
+                      >
+                        Remove Uploaded Video File
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex justify-end gap-3 mt-4">
                   <button
                     type="button"
@@ -672,6 +801,7 @@ export default function AdminPanel() {
                     <th className="p-5">TITLE & TAGLINE</th>
                     <th className="p-5">TECH STACK</th>
                     <th className="p-5 w-24 text-center">FEATURED</th>
+                    <th className="p-5 w-24 text-center">VIDEO</th>
                     <th className="p-5 w-32 text-right">ACTIONS</th>
                   </tr>
                 </thead>
@@ -727,7 +857,7 @@ export default function AdminPanel() {
                                 borderRadius: 4,
                               }}
                             >
-                              {t}
+                               {t}
                             </span>
                           ))}
                         </div>
@@ -758,6 +888,48 @@ export default function AdminPanel() {
                             }}
                           >
                             NO
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-5 text-center">
+                        {dbVideoStatus[p.id] ? (
+                          <span
+                            className="mono text-[10px]"
+                            style={{
+                              color: "#10b981",
+                              background: "rgba(16,185,129,0.12)",
+                              border: "1px solid rgba(16,185,129,0.25)",
+                              padding: "2px 8px",
+                              borderRadius: 6,
+                            }}
+                          >
+                            FILE (DB)
+                          </span>
+                        ) : p.videoUrl ? (
+                          <span
+                            className="mono text-[10px]"
+                            style={{
+                              color: "#6366f1",
+                              background: "rgba(99,102,241,0.12)",
+                              border: "1px solid rgba(99,102,241,0.25)",
+                              padding: "2px 8px",
+                              borderRadius: 6,
+                            }}
+                          >
+                            URL LINK
+                          </span>
+                        ) : (
+                          <span
+                            className="mono text-[10px]"
+                            style={{
+                              color: "#64748b",
+                              background: "rgba(255,255,255,0.04)",
+                              border: "1px solid rgba(255,255,255,0.06)",
+                              padding: "2px 8px",
+                              borderRadius: 6,
+                            }}
+                          >
+                            NONE
                           </span>
                         )}
                       </td>

@@ -1,7 +1,9 @@
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Github, Download, Play } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Github, Download, Play, Video } from "lucide-react";
 import { motion } from "motion/react";
 import { getProjects } from "@/utils/projectDb";
+import { VideoModal } from "@/components/VideoModal";
 
 interface ProjectExtra {
   features: string[];
@@ -120,6 +122,35 @@ export default function ProjectPreview() {
   const { id } = useParams<{ id: string }>();
   const projects = getProjects();
   const project = projects.find((p) => p.id === id);
+
+  const [hasDbVideo, setHasDbVideo] = useState(false);
+  const [dbVideoUrl, setDbVideoUrl] = useState<string | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<{ src: string; title: string; color?: string } | null>(null);
+
+  useEffect(() => {
+    if (!project) return;
+    let active = true;
+    const checkVideo = async () => {
+      try {
+        const { getVideo } = await import("@/utils/videoDb");
+        const blob = await getVideo(project.id);
+        if (blob && active) {
+          setHasDbVideo(true);
+          const url = URL.createObjectURL(blob);
+          setDbVideoUrl(url);
+        }
+      } catch (e) {
+        console.error("IndexedDB error", e);
+      }
+    };
+    checkVideo();
+    return () => {
+      active = false;
+      if (dbVideoUrl) {
+        URL.revokeObjectURL(dbVideoUrl);
+      }
+    };
+  }, [project?.id]);
 
   if (!project) {
     return (
@@ -331,6 +362,38 @@ export default function ProjectPreview() {
                 </a>
               );
             })()}
+
+            {(project.videoUrl || hasDbVideo) && (
+              <button
+                onClick={() => setPlayingVideo({ src: dbVideoUrl || project.videoUrl!, title: project.title, color: projectColor })}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "12px 28px",
+                  borderRadius: 10,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  border: `1px solid ${projectColor}50`,
+                  background: `${projectColor}15`,
+                  color: projectColor,
+                  cursor: "pointer",
+                  transition: "transform 0.2s, box-shadow 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.background = `${projectColor}25`;
+                  e.currentTarget.style.boxShadow = `0 8px 24px ${projectColor}35`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.background = `${projectColor}15`;
+                  e.currentTarget.style.boxShadow = "";
+                }}
+              >
+                <Video size={16} /> Watch Demo
+              </button>
+            )}
 
             {project.githubUrl && (
               <>
@@ -562,6 +625,14 @@ export default function ProjectPreview() {
           </Link>
         </p>
       </footer>
+
+      <VideoModal
+        isOpen={!!playingVideo}
+        onClose={() => setPlayingVideo(null)}
+        videoSrc={playingVideo?.src || ""}
+        projectTitle={playingVideo?.title || ""}
+        projectColor={playingVideo?.color}
+      />
     </div>
   );
 }

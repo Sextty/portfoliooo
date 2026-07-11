@@ -2,16 +2,45 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { getProjects, Project } from "@/utils/projectDb";
-import { Github, Play, ArrowLeft } from "lucide-react";
+import { Github, Play, ArrowLeft, ExternalLink } from "lucide-react";
+import { VideoModal } from "@/components/VideoModal";
 
 function ProjectCard({
   project,
   index,
+  onWatchDemo,
 }: {
   project: Project;
   index: number;
+  onWatchDemo: (src: string, title: string, color?: string) => void;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const [hasDbVideo, setHasDbVideo] = useState(false);
+  const [dbVideoUrl, setDbVideoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const checkVideo = async () => {
+      try {
+        const { getVideo } = await import("@/utils/videoDb");
+        const blob = await getVideo(project.id);
+        if (blob && active) {
+          setHasDbVideo(true);
+          const url = URL.createObjectURL(blob);
+          setDbVideoUrl(url);
+        }
+      } catch (e) {
+        console.error("IndexedDB error", e);
+      }
+    };
+    checkVideo();
+    return () => {
+      active = false;
+      if (dbVideoUrl) {
+        URL.revokeObjectURL(dbVideoUrl);
+      }
+    };
+  }, [project.id]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = cardRef.current;
@@ -83,17 +112,27 @@ function ProjectCard({
                   {project.year}
                 </span>
               </div>
-              <h3
-                style={{
-                  fontFamily: "'Sora', sans-serif",
-                  fontWeight: 700,
-                  fontSize: "1.2rem",
-                  color: "#e8ecf4",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                {project.title}
-              </h3>
+              <Link to={`/project/${project.id}`} style={{ textDecoration: "none" }}>
+                <h3
+                  style={{
+                    fontFamily: "'Sora', sans-serif",
+                    fontWeight: 700,
+                    fontSize: "1.2rem",
+                    color: "#e8ecf4",
+                    letterSpacing: "-0.02em",
+                    cursor: "pointer",
+                    transition: "color 0.25s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = project.color;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "#e8ecf4";
+                  }}
+                >
+                  {project.title}
+                </h3>
+              </Link>
               <p
                 style={{
                   fontSize: 12,
@@ -105,7 +144,7 @@ function ProjectCard({
               </p>
             </div>
 
-            <div className="flex gap-2 mt-1">
+            <div className="flex gap-2 mt-1" onClick={(e) => e.stopPropagation()}>
               {project.githubUrl && (
                 <a
                   href={project.githubUrl}
@@ -134,11 +173,44 @@ function ProjectCard({
                     (e.currentTarget as HTMLAnchorElement).style.background =
                       "rgba(255,255,255,0.04)";
                   }}
+                  title="View Source Code"
                 >
                   <Github size={15} />
                 </a>
               )}
-              {(() => {
+
+              {(project.videoUrl || hasDbVideo) && (
+                <button
+                  onClick={() => onWatchDemo(dbVideoUrl || project.videoUrl!, project.title, project.color)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 34,
+                    height: 34,
+                    borderRadius: 10,
+                    background: `${project.color}15`,
+                    border: `1px solid ${project.color}30`,
+                    color: project.color,
+                    cursor: "pointer",
+                    transition: "background 0.25s, box-shadow 0.25s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = `${project.color}28`;
+                    e.currentTarget.style.boxShadow = `0 0 16px ${project.color}30`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = `${project.color}15`;
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                  title="Watch Demo Video"
+                >
+                  <Play size={15} fill="currentColor" />
+                </button>
+              )}
+
+              {project.runUrl && (() => {
+                const isInternal = project.runUrl.startsWith("/");
                 const btnStyle = {
                   display: "flex" as const,
                   alignItems: "center" as const,
@@ -146,24 +218,28 @@ function ProjectCard({
                   width: 34,
                   height: 34,
                   borderRadius: 10,
-                  background: `${project.color}15`,
-                  border: `1px solid ${project.color}30`,
-                  color: project.color,
-                  transition: "background 0.25s, box-shadow 0.25s",
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "#64748b",
+                  transition: "color 0.25s, background 0.25s",
                   textDecoration: "none" as const,
                 };
                 const hoverEnter = (e: any) => {
-                  e.currentTarget.style.background = `${project.color}28`;
-                  e.currentTarget.style.boxShadow = `0 0 16px ${project.color}30`;
+                  e.currentTarget.style.color = "#e8ecf4";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
                 };
                 const hoverLeave = (e: any) => {
-                  e.currentTarget.style.background = `${project.color}15`;
-                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.color = "#64748b";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.04)";
                 };
-                return (
-                  <Link to={`/project/${project.id}`} style={btnStyle} onMouseEnter={hoverEnter} onMouseLeave={hoverLeave}>
-                    <Play size={15} />
+                return isInternal ? (
+                  <Link to={project.runUrl} style={btnStyle} onMouseEnter={hoverEnter} onMouseLeave={hoverLeave} title="Live Demo">
+                    <ExternalLink size={15} />
                   </Link>
+                ) : (
+                  <a href={project.runUrl} target="_blank" rel="noreferrer" style={btnStyle} onMouseEnter={hoverEnter} onMouseLeave={hoverLeave} title="Live Demo">
+                    <ExternalLink size={15} />
+                  </a>
                 );
               })()}
             </div>
@@ -210,6 +286,7 @@ function ProjectCard({
 export default function ProjectZone() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [search, setSearch] = useState("");
+  const [playingVideo, setPlayingVideo] = useState<{ src: string; title: string; color?: string } | null>(null);
 
   useEffect(() => {
     setProjects(getProjects());
@@ -331,7 +408,7 @@ export default function ProjectZone() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((p, i) => (
-              <ProjectCard key={p.id} project={p} index={i} />
+              <ProjectCard key={p.id} project={p} index={i} onWatchDemo={(src, title, color) => setPlayingVideo({ src, title, color })} />
             ))}
           </div>
         )}
@@ -368,6 +445,14 @@ export default function ProjectZone() {
           </Link>
         </div>
       </footer>
+
+      <VideoModal
+        isOpen={!!playingVideo}
+        onClose={() => setPlayingVideo(null)}
+        videoSrc={playingVideo?.src || ""}
+        projectTitle={playingVideo?.title || ""}
+        projectColor={playingVideo?.color}
+      />
     </div>
   );
 }
