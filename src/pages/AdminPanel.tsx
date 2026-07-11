@@ -209,11 +209,16 @@ export default function AdminPanel() {
     };
 
     let projectId = editingId;
-    if (editingId) {
-      updateProject(editingId, projectPayload);
-    } else {
-      const newProj = addProject(projectPayload);
-      projectId = newProj.id;
+    try {
+      if (editingId) {
+        updateProject(editingId, projectPayload);
+      } else {
+        const newProj = addProject(projectPayload);
+        projectId = newProj.id;
+      }
+    } catch (err) {
+      console.error("Save failed, aborting", err);
+      return; // keep the form open with the user's data intact
     }
 
     if (videoFile && projectId) {

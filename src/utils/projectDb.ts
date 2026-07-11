@@ -106,7 +106,17 @@ export function getProjects(): Project[] {
 }
 
 export function saveProjects(projects: Project[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  } catch (e) {
+    console.error("Failed to save projects to localStorage", e);
+    // Most common cause: localStorage quota exceeded (base64 images are heavy).
+    alert(
+      "Failed to save changes — your browser's storage is full (this usually happens when project images are too large). " +
+      "Try a smaller image, or remove an old uploaded image, then save again."
+    );
+    throw e; // re-throw so callers (handleSubmit) know it failed
+  }
 }
 
 export function addProject(project: Omit<Project, "id">): Project {

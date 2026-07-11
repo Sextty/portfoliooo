@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/((?!assets/|public/|sql-wasm.wasm).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
