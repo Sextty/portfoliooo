@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "projects": [
+    {
+      "id": "girls-boutique",
+      "title": "Girls Boutique",
+      "tagline": "E-Commerce Platform for Fashion & Beauty",
+      "description": "A full-featured PHP e-commerce boutique for women's fashion, makeup, and accessories. Features product catalog with categories, shopping cart, wishlist, checkout, admin dashboard, and MySQL database.",
+      "tags": ["PHP", "MySQL", "Tailwind CSS", "JavaScript", "HTML/CSS"],
+      "featured": true,
+      "color": "#ec4899",
+      "year": "2025",
+      "runUrl": "/girls-boutique",
+      "githubUrl": "https://github.com/Sextty/girls-boutique",
+      "videoUrl": ""
+    },
+    {
+      "id": "devpulse",
+      "title": "DevPulse",
+      "tagline": "Developer Analytics Dashboard",
+      "description": "Real-time engineering metrics platform with CI/CD pipeline insights, team velocity charts, and automated performance reports.",
+      "tags": ["React", "Python", "FastAPI", "ClickHouse", "D3.js"],
+      "featured": true,
+      "color": "#10b981",
+      "year": "2024",
+      "runUrl": "",
+      "githubUrl": "https://github.com/Sextty/devpulse",
+      "videoUrl": ""
+    },
+    {
+      "id": "chatflow-ai",
+      "title": "ChatFlow AI",
+      "tagline": "Real-Time Messaging with AI",
+      "description": "Scalable messaging platform with AI-powered smart replies, conversation threading, voice messages, and end-to-end encryption.",
+      "tags": ["Next.js", "Socket.io", "Redis", "OpenAI", "MongoDB"],
+      "featured": true,
+      "color": "#8b5cf6",
+      "year": "2023",
+      "runUrl": "",
+      "githubUrl": "https://github.com/Sextty/chatflow-ai",
+      "videoUrl": ""
+    },
+    {
+      "id": "cloudvault",
+      "title": "CloudVault",
+      "tagline": "Secure File Storage & Collaboration",
+      "description": "Team collaboration platform with version-controlled file storage, real-time document editing, and granular permission management.",
+      "tags": ["React", "NestJS", "AWS S3", "PostgreSQL", "WebSockets"],
+      "featured": false,
+      "color": "#f59e0b",
+      "year": "2023",
+      "runUrl": "",
+      "githubUrl": "https://github.com/Sextty/cloudvault",
+      "videoUrl": ""
+    }
+  ]
+}

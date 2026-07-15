@@ -55,13 +55,22 @@ The portfolio is styled as an engineering drawing: a deep drafting-blue sheet, f
 - **Mobile nav** — hamburger toggle below `md` with animated dropdown (About / Projects / Contact / All Projects / Hire Me)
 
 ### 2. Project System
-- **Storage:** localStorage under key `wassim_portfolio_projects_v3` (bumped to bust stale caches; legacy `liveUrl` migrates to `runUrl`)
-- **CRUD:** Full create/read/update/delete via Admin Panel
+- **Committed source of truth:** `src/data/projects.json` (`{ version, projects[] }`) is baked into the build — it's what **every visitor on every device** sees. Edit it (or Admin → Export for Deploy), commit & push to publish.
+- **Local cache:** `getProjects()` seeds localStorage (`wassim_portfolio_projects`) from that JSON. Bumping `version` in the JSON makes every browser drop its cached copy and reload the deployed data (legacy bare-array / `liveUrl` shapes auto-migrate). `DATA_VERSION` is exported from `projectDb.ts`.
+- **CRUD:** Full create/read/update/delete via Admin Panel (writes the local cache only — see "Publishing" below to push changes live)
 - **Default projects:** 4 seeded — Girls Boutique (real), plus DevPulse / ChatFlow AI / CloudVault (placeholders)
 - **Optional URLs:** `runUrl` and `githubUrl` are optional; buttons only render when URL exists
 - **`ProjectCard`** — shared "mini drawing sheet" card in `src/components/ProjectCard.tsx`, used by both PublicPortfolio (`appear="scroll"`) and ProjectZone (`appear="mount"`)
-- **Videos:** per-project demo videos stored in IndexedDB (`src/utils/videoDb.ts`), played in the accessible `VideoModal` (Escape closes, `role="dialog"`)
-- ⚠️ Projects/videos live only in the browser that edited them — admin changes do NOT reach deployed visitors (no backend)
+- **Videos — two modes:**
+  - *Baked-in (visible to everyone):* a file in `public/videos/<id>.mp4` referenced by the project's `videoUrl` = `/videos/<id>.mp4`. This is committed and deployed.
+  - *Local upload (this browser only):* uploaded via Admin → stored in IndexedDB (`src/utils/videoDb.ts`), good for a quick preview. `ProjectCard`/`ProjectPreview` prefer the IndexedDB blob, else fall back to `videoUrl`.
+  - Played in the accessible `VideoModal` (Escape closes, `role="dialog"`).
+
+### 2a. Publishing admin changes to production
+Admin edits (and uploaded videos) live only in the editing browser until baked into the repo. To push them live for all devices:
+1. Admin Panel → **Export for Deploy** → downloads `projects.json` (with `videoUrl` rewritten to `/videos/<id>.<ext>`, `version` bumped) + every uploaded video file. (Per-project: **Download for deploy** in the video section.)
+2. Replace `src/data/projects.json` with the download; move video file(s) into `public/videos/`.
+3. Commit & push (**`git push newrepo master`** — Vercel deploys from the `newrepo` remote) → live on all devices.
 
 ### 3. Admin Panel
 - **Password gate:** `VITE_ADMIN_PASSWORD` env var (falls back to `admin123`) — client-side only, low security by design
@@ -118,7 +127,7 @@ The portfolio is styled as an engineering drawing: a deep drafting-blue sheet, f
 
 | Issue | Status | Notes |
 |-------|--------|-------|
-| Projects only persist per-browser | ⚠️ By design (for now) | localStorage/IndexedDB; needs a real backend for cross-device persistence |
+| Admin edits don't auto-reach visitors | ℹ️ By design (no backend) | Edits/uploads are per-browser; publish via Admin → Export for Deploy → commit `src/data/projects.json` + `public/videos/*` → push (see §2a) |
 | 3 of 4 seed projects are placeholders | ⚠️ Content | DevPulse / ChatFlow AI / CloudVault have no real repos or demos |
 | Pre-existing lint errors | ⚠️ Pre-existing | ~18 errors in unused `src/components/ui/*` (react-refresh rule) and GirlsBoutique (`any` types); build unaffected |
 | `src/components/ui/*` unused | ℹ️ Note | shadcn scaffolding (~45 files) + many deps not imported by any page |
@@ -155,10 +164,12 @@ src/
 │   ├── ScrollProgress.tsx           # Fixed redline scroll progress bar
 │   ├── SectionDivider.tsx           # Dimension-line section separator
 │   └── SectionEntrance.tsx          # Fade-up entrance wrapper
+├── data/
+│   └── projects.json                # Committed source of truth ({version, projects[]}) — baked into build
 ├── theme/
 │   └── palette.ts                   # Blueprint COLORS + FONTS tokens (imported by JSX)
 ├── utils/
-│   ├── projectDb.ts                 # Project interface + localStorage CRUD + defaults
+│   ├── projectDb.ts                 # Project interface + localStorage cache seeded from data/projects.json
 │   ├── videoDb.ts                   # IndexedDB blob storage for demo videos
 │   └── useActiveSection.ts          # IntersectionObserver hook
 └── styles/
@@ -169,6 +180,7 @@ src/
 public/
 ├── og-image.png                     # 1200×630 social share image
 ├── robots.txt / sitemap.xml         # SEO
+├── videos/                          # Baked-in demo videos (served at /videos/*, visible to all)
 └── sql-wasm.wasm                    # sql.js runtime for /girls-boutique
 ```
 
@@ -185,3 +197,4 @@ public/
 | — | Admin video upload (IndexedDB) + localStorage quota error handling |
 | 2026-07-15 | **Upgrade pass:** shared ProjectCard (deduped ~280 lines ×2), mobile nav menu, mailto contact form + clickable contact links, route code-splitting (main JS 484→352 KB, boutique/admin/preview lazy), font loading via preconnect links, OG/Twitter meta + og-image + robots.txt + sitemap.xml, VideoModal a11y (Escape, dialog role, labels), fixed object-URL revoke leaks, fixed broken ESLint flat config |
 | 2026-07-15 | **Blueprint rebrand:** replaced indigo/emerald neon + glassmorphism with the engineering-drawing design system (drafting-blue sheet, redline accent, Archivo/IBM Plex, drawing frame, FIG labels, dimension lines, title-block footer); new `BlueprintSchematic` hero + `palette.ts`; removed CodeTerminal and all glass/tilt/shimmer/dot-grid; blueprint favicon + og-image. GirlsBoutique demo left on its own pink brand. |
+| 2026-07-15 | **Bake-in publishing pipeline:** moved project data to committed `src/data/projects.json` (`{version, projects}`, version-based cache refresh in `projectDb.ts`); added `public/videos/` for baked-in demo videos; Admin **Export for Deploy** (downloads `projects.json` + uploaded videos with `videoUrl` rewritten to `/videos/…`) and per-project **Download for deploy**, so admin changes can be committed and shown on every device. |

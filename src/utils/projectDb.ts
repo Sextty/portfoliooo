@@ -1,3 +1,5 @@
+import seedData from "@/data/projects.json";
+
 export interface Project {
   id: string;
   title: string;
@@ -7,107 +9,82 @@ export interface Project {
   image?: string; // Base64 or URL
   runUrl?: string;
   githubUrl?: string;
-  videoUrl?: string; // Path/URL to local or external demo video
+  videoUrl?: string; // Path/URL to a demo video — e.g. "/videos/foo.mp4" (baked
+                     // into public/ and served to every visitor) or an external URL
   featured: boolean;
   color: string;
   year: string;
 }
 
-// Bumped from v2 -> v3: forces every browser (including yours) to drop any
-// stale cached project list and load the corrected DEFAULT_PROJECTS below.
-// Bump this again any time you edit DEFAULT_PROJECTS and want visitors who
-// already loaded the site to see the change instead of their old cached copy.
-const STORAGE_KEY = "wassim_portfolio_projects_v3";
+interface Seed {
+  version: number;
+  projects: Project[];
+}
 
-const DEFAULT_PROJECTS: Project[] = [
-  {
-    id: "girls-boutique",
-    title: "Girls Boutique",
-    tagline: "E-Commerce Platform for Fashion & Beauty",
-    description: "A full-featured PHP e-commerce boutique for women's fashion, makeup, and accessories. Features product catalog with categories, shopping cart, wishlist, checkout, admin dashboard, and MySQL database.",
-    tags: ["PHP", "MySQL", "Tailwind CSS", "JavaScript", "HTML/CSS"],
-    featured: true,
-    color: "#ec4899",
-    year: "2025",
-    runUrl: "/girls-boutique",
-    githubUrl: "https://github.com/Sextty/girls-boutique",
-    videoUrl: ""
-  },
-  {
-    id: "devpulse",
-    title: "DevPulse",
-    tagline: "Developer Analytics Dashboard",
-    description: "Real-time engineering metrics platform with CI/CD pipeline insights, team velocity charts, and automated performance reports.",
-    tags: ["React", "Python", "FastAPI", "ClickHouse", "D3.js"],
-    featured: true,
-    color: "#10b981",
-    year: "2024",
-    // No live deployment yet — leave empty so the "Live Demo" button
-    // simply doesn't render (see ProjectCard: {project.runUrl && (...)}).
-    // Fill this in with the real deployed URL once it exists, e.g.
-    // "https://devpulse.vercel.app" or "/devpulse" if served internally.
-    runUrl: "",
-    githubUrl: "https://github.com/Sextty/devpulse",
-    videoUrl: ""
-  },
-  {
-    id: "chatflow-ai",
-    title: "ChatFlow AI",
-    tagline: "Real-Time Messaging with AI",
-    description: "Scalable messaging platform with AI-powered smart replies, conversation threading, voice messages, and end-to-end encryption.",
-    tags: ["Next.js", "Socket.io", "Redis", "OpenAI", "MongoDB"],
-    featured: true,
-    color: "#8b5cf6",
-    year: "2023",
-    runUrl: "",
-    githubUrl: "https://github.com/Sextty/chatflow-ai",
-    videoUrl: ""
-  },
-  {
-    id: "cloudvault",
-    title: "CloudVault",
-    tagline: "Secure File Storage & Collaboration",
-    description: "Team collaboration platform with version-controlled file storage, real-time document editing, and granular permission management.",
-    tags: ["React", "NestJS", "AWS S3", "PostgreSQL", "WebSockets"],
-    featured: false,
-    color: "#f59e0b",
-    year: "2023",
-    runUrl: "",
-    githubUrl: "https://github.com/Sextty/cloudvault",
-    videoUrl: ""
-  }
-];
+// The COMMITTED source of truth for what every visitor on every device sees.
+// It's baked into the build from src/data/projects.json. To publish a change
+// (including a demo video), edit that file — or use the Admin panel's
+// "Export for deploy" button — then commit & push so Vercel redeploys.
+//
+// Bumping `version` in src/data/projects.json forces every browser (including
+// yours) to drop its cached copy and reload the freshly-deployed data, so the
+// change actually appears instead of a stale localStorage snapshot.
+const SEED = seedData as unknown as Seed;
+export const DATA_VERSION = SEED.version;
+
+const STORAGE_KEY = "wassim_portfolio_projects";
+
+interface StoredShape {
+  version: number;
+  projects: Project[];
+}
+
+function migrateLegacyUrls(projects: Array<Project & { liveUrl?: string }>): Project[] {
+  return projects.map((p) => {
+    if (p.liveUrl && !p.runUrl) {
+      p.runUrl = p.liveUrl;
+      delete p.liveUrl;
+    }
+    return p as Project;
+  });
+}
+
+function writeStore(projects: Project[]): void {
+  const payload: StoredShape = { version: SEED.version, projects };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+}
+
+// Load the committed data as the working copy (used on first visit and whenever
+// a newer deploy supersedes the cached copy).
+function reseedFromCommitted(): Project[] {
+  writeStore(SEED.projects);
+  return SEED.projects;
+}
 
 export function getProjects(): Project[] {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (!data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PROJECTS));
-    return DEFAULT_PROJECTS;
-  }
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return reseedFromCommitted();
   try {
-    const projects: any[] = JSON.parse(data);
-    let changed = false;
-    const migrated = projects.map((p) => {
-      if (p.liveUrl && !p.runUrl) {
-        p.runUrl = p.liveUrl;
-        delete p.liveUrl;
-        changed = true;
-      }
-      return p as Project;
-    });
-    if (changed) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+    const parsed = JSON.parse(raw);
+    // Back-compat: the previous format stored a bare array with no version.
+    const stored: StoredShape = Array.isArray(parsed)
+      ? { version: 0, projects: parsed }
+      : parsed;
+    // A newer committed version means the deployed site changed (e.g. a baked-in
+    // demo video was added) — discard the stale cache and reseed from the deploy.
+    if (!stored.version || stored.version < SEED.version) {
+      return reseedFromCommitted();
     }
-    return migrated;
+    return migrateLegacyUrls(stored.projects);
   } catch (e) {
     console.error("Error parsing projects from localStorage", e);
-    return DEFAULT_PROJECTS;
+    return SEED.projects;
   }
 }
 
 export function saveProjects(projects: Project[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    writeStore(projects);
   } catch (e) {
     console.error("Failed to save projects to localStorage", e);
     // Most common cause: localStorage quota exceeded (base64 images are heavy).

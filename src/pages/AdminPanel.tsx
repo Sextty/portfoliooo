@@ -5,6 +5,7 @@ import {
   addProject,
   updateProject,
   deleteProject,
+  DATA_VERSION,
   Project,
 } from "@/utils/projectDb";
 import {
@@ -18,6 +19,8 @@ import {
   Star,
   Layers,
   Image as ImageIcon,
+  Download,
+  PackageCheck,
 } from "lucide-react";
 
 const BEAUTIFUL_COLORS = [
@@ -145,6 +148,93 @@ export default function AdminPanel() {
       } catch (err) {
         console.error("Error removing video", err);
       }
+    }
+  };
+
+  // ---- Publish to production (bake data + videos into the committed project) ----
+  // Videos uploaded above live only in THIS browser (IndexedDB). To make a video
+  // visible on every device, its file must be committed to public/videos/ and the
+  // project's videoUrl must point at it. These helpers export exactly those files.
+
+  const triggerDownload = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  };
+
+  const videoExt = (blob: Blob) => (blob.type.includes("webm") ? "webm" : "mp4");
+
+  // Download a single project's uploaded video as public/videos/<id>.<ext>
+  const handleDownloadVideoForDeploy = async (projectId: string) => {
+    try {
+      const { getVideo } = await import("@/utils/videoDb");
+      const blob = await getVideo(projectId);
+      if (!blob) {
+        alert("No uploaded video found for this project.");
+        return;
+      }
+      const filename = `${projectId}.${videoExt(blob)}`;
+      triggerDownload(blob, filename);
+      alert(
+        `Downloaded "${filename}".\n\n` +
+        `Next: put it in  public/videos/  and set this project's Video URL to  /videos/${filename}  (Export for deploy does both automatically).`
+      );
+    } catch (err) {
+      console.error("Error downloading video", err);
+      alert("Could not read the video file. Try re-uploading it.");
+    }
+  };
+
+  // Export the whole committed data bundle: projects.json (with videoUrl rewritten
+  // to /videos/<id>.<ext> for any uploaded video) + every uploaded video file.
+  const handleExportForDeploy = async () => {
+    try {
+      const { getVideo } = await import("@/utils/videoDb");
+      const exported: Project[] = [];
+      const videoFiles: string[] = [];
+      const blobsToDownload: { blob: Blob; name: string }[] = [];
+
+      for (const p of projects) {
+        let videoUrl = p.videoUrl || "";
+        const blob = await getVideo(p.id);
+        if (blob) {
+          const name = `${p.id}.${videoExt(blob)}`;
+          videoUrl = `/videos/${name}`;
+          videoFiles.push(name);
+          blobsToDownload.push({ blob, name });
+        }
+        exported.push({ ...p, videoUrl });
+      }
+
+      const payload = { version: DATA_VERSION + 1, projects: exported };
+      triggerDownload(
+        new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }),
+        "projects.json"
+      );
+
+      // Stagger the video downloads slightly so the browser doesn't drop them.
+      blobsToDownload.forEach((v, i) => {
+        setTimeout(() => triggerDownload(v.blob, v.name), 400 * (i + 1));
+      });
+
+      alert(
+        "EXPORTED FOR DEPLOY\n\n" +
+        `• projects.json  (${exported.length} projects, version ${DATA_VERSION + 1})\n` +
+        `• ${videoFiles.length} video file(s): ${videoFiles.join(", ") || "none"}\n\n` +
+        "TO PUBLISH TO ALL DEVICES:\n" +
+        "1. Replace  src/data/projects.json  with the downloaded file\n" +
+        "2. Move any downloaded video(s) into  public/videos/\n" +
+        "3. Commit & push (git push newrepo master) — Vercel redeploys\n\n" +
+        "Tip: hand these downloaded files to Claude and ask it to deploy them."
+      );
+    } catch (err) {
+      console.error("Export for deploy failed", err);
+      alert("Export failed — see the browser console for details.");
     }
   };
 
@@ -399,12 +489,21 @@ export default function AdminPanel() {
             <div className="gradient-line mt-5 max-w-sm" />
           </div>
 
-          <button
-            onClick={openAddForm}
-            className="btn-primary px-6 py-3.5 rounded-xl text-[14px] flex items-center gap-2"
-          >
-            <Plus size={16} /> Add New Project
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleExportForDeploy}
+              className="btn-ghost px-5 py-3.5 rounded-xl text-[14px] flex items-center gap-2"
+              title="Download projects.json + uploaded videos so they can be committed and shown on every device"
+            >
+              <PackageCheck size={16} /> Export for Deploy
+            </button>
+            <button
+              onClick={openAddForm}
+              className="btn-primary px-6 py-3.5 rounded-xl text-[14px] flex items-center gap-2"
+            >
+              <Plus size={16} /> Add New Project
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
@@ -700,8 +799,15 @@ export default function AdminPanel() {
                 {/* Video Section */}
                 <div className="border border-border rounded-xl p-5 bg-card/30 flex flex-col gap-4">
                   <div className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
-                    PROJECT DEMO VIDEO (UPLOAD FILE TO INDEXEDDB OR PASTE ONLINE URL)
+                    PROJECT DEMO VIDEO
                   </div>
+                  <p style={{ fontSize: 11.5, color: "#7FA3C9", lineHeight: 1.6, marginTop: -6 }}>
+                    Uploading a file saves it to <strong>this browser only</strong> (great for a
+                    quick preview). To make the video show on <strong>every device</strong>, either
+                    paste a <strong>Video URL</strong> (e.g. a <code>/videos/&lt;name&gt;.mp4</code>
+                    {" "}file committed to the project, or a YouTube link), or use{" "}
+                    <strong>Export for Deploy</strong> at the top to bake the uploaded file into the site.
+                  </p>
 
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div className="flex flex-col gap-2">
@@ -741,20 +847,35 @@ export default function AdminPanel() {
                     </div>
                   </div>
 
-                  {editingId && (dbVideoStatus[editingId] || videoFile) && (
-                    <div className="mt-1 flex items-center justify-between bg-black/20 p-3 rounded-lg border border-border/40">
-                      <div className="flex items-center gap-2">
-                        <span style={{ fontSize: 12, color: "#FF5C39" }} className="mono">
-                          🎥 Stored video file exists in IndexedDB
-                        </span>
+                  {editingId && dbVideoStatus[editingId] && (
+                    <div className="mt-1 flex flex-wrap items-center justify-between gap-3 bg-black/20 p-3 rounded-lg border border-border/40">
+                      <span style={{ fontSize: 12, color: "#FF5C39" }} className="mono">
+                        🎥 Uploaded video stored in this browser
+                      </span>
+                      <div className="flex items-center gap-4">
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadVideoForDeploy(editingId)}
+                          className="text-xs text-primary hover:underline bg-transparent border-0 cursor-pointer flex items-center gap-1.5"
+                          title="Download this video as a file you can commit to public/videos/"
+                        >
+                          <Download size={13} /> Download for deploy
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemoveDbVideo}
+                          className="text-xs text-destructive hover:underline bg-transparent border-0 cursor-pointer"
+                        >
+                          Remove
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleRemoveDbVideo}
-                        className="text-xs text-destructive hover:underline bg-transparent border-0 cursor-pointer"
-                      >
-                        Remove Uploaded Video File
-                      </button>
+                    </div>
+                  )}
+                  {editingId && !dbVideoStatus[editingId] && videoFile && (
+                    <div className="mt-1 bg-black/20 p-3 rounded-lg border border-border/40">
+                      <span style={{ fontSize: 12, color: "#FF5C39" }} className="mono">
+                        ✓ New file ready — click {editingId ? '"Save Changes"' : '"Create Project"'} to store it
+                      </span>
                     </div>
                   )}
                 </div>
