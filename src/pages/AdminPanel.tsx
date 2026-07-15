@@ -21,11 +21,11 @@ import {
 } from "lucide-react";
 
 const BEAUTIFUL_COLORS = [
+  { name: "Redline", value: "#ff5c39" },
+  { name: "Trace Blue", value: "#7fa3c9" },
   { name: "Indigo", value: "#6366f1" },
   { name: "Emerald", value: "#10b981" },
-  { name: "Purple", value: "#8b5cf6" },
   { name: "Amber", value: "#f59e0b" },
-  { name: "Cyan", value: "#06b6d4" },
   { name: "Pink", value: "#ec4899" },
 ];
 
@@ -48,7 +48,7 @@ export default function AdminPanel() {
     githubUrl: "",
     videoUrl: "",
     featured: false,
-    color: "#6366f1",
+    color: "#ff5c39",
     year: new Date().getFullYear().toString(),
   });
 
@@ -160,7 +160,7 @@ export default function AdminPanel() {
       githubUrl: "",
       videoUrl: "",
       featured: false,
-      color: "#6366f1",
+      color: "#ff5c39",
       year: new Date().getFullYear().toString(),
     });
     setVideoFile(null);
@@ -179,7 +179,7 @@ export default function AdminPanel() {
       githubUrl: project.githubUrl || "",
       videoUrl: project.videoUrl || "",
       featured: project.featured,
-      color: project.color || "#6366f1",
+      color: project.color || "#ff5c39",
       year: project.year || new Date().getFullYear().toString(),
     });
     setVideoFile(null);
@@ -252,7 +252,7 @@ export default function AdminPanel() {
     return (
       <div
         className="min-h-screen flex items-center justify-center bg-background dot-grid"
-        style={{ color: "#e8ecf4" }}
+        style={{ color: "#E6EEF7" }}
       >
         <div className="absolute top-8 left-8">
           <Link
@@ -274,20 +274,20 @@ export default function AdminPanel() {
             </div>
             <h1
               style={{
-                fontFamily: "'Sora', sans-serif",
+                fontFamily: "'Archivo', sans-serif",
                 fontWeight: 700,
                 fontSize: "1.5rem",
               }}
             >
               Admin Dashboard
             </h1>
-            <p style={{ fontSize: 13, color: "#64748b", marginTop: 6 }}>
+            <p style={{ fontSize: 13, color: "#7FA3C9", marginTop: 6 }}>
               Enter password to access database management
             </p>
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+            <label className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
               PASSWORD
             </label>
             <input
@@ -320,15 +320,15 @@ export default function AdminPanel() {
   return (
     <div
       className="min-h-screen bg-background dot-grid flex flex-col"
-      style={{ color: "#e8ecf4" }}
+      style={{ color: "#E6EEF7" }}
     >
       {/* Header */}
       <header
         style={{
           height: 72,
-          background: "rgba(6,9,18,0.85)",
+          background: "rgba(11,30,54,0.94)",
           backdropFilter: "blur(20px)",
-          borderBottom: "1px solid rgba(99,102,241,0.12)",
+          borderBottom: "1px solid rgba(127,163,201,0.25)",
         }}
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 md:px-16"
       >
@@ -351,15 +351,15 @@ export default function AdminPanel() {
 
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <span style={{ fontSize: 13, color: "#64748b" }} className="mono">
+            <span style={{ fontSize: 13, color: "#7FA3C9" }} className="mono">
               SESSION STATUS:
             </span>
             <span
               style={{
                 fontSize: 12,
-                color: "#10b981",
-                background: "rgba(16,185,129,0.12)",
-                border: "1px solid rgba(16,185,129,0.25)",
+                color: "#FF5C39",
+                background: "rgba(255,92,57,0.12)",
+                border: "1px solid rgba(255,92,57,0.3)",
                 padding: "2px 8px",
                 borderRadius: 6,
               }}
@@ -386,10 +386,10 @@ export default function AdminPanel() {
             <p className="section-tag mb-3">◈ &nbsp;Control Panel</p>
             <h1
               style={{
-                fontFamily: "'Sora', sans-serif",
+                fontFamily: "'Archivo', sans-serif",
                 fontWeight: 800,
                 fontSize: "clamp(2rem, 5vw, 3.2rem)",
-                color: "#e8ecf4",
+                color: "#E6EEF7",
                 letterSpacing: "-0.03em",
                 lineHeight: 1.1,
               }}
@@ -414,14 +414,14 @@ export default function AdminPanel() {
               <Folder className="text-primary" size={20} />
             </div>
             <div>
-              <div style={{ fontSize: 12, color: "#64748b" }} className="mono">
+              <div style={{ fontSize: 12, color: "#7FA3C9" }} className="mono">
                 TOTAL PROJECTS
               </div>
               <div
                 style={{
                   fontSize: "1.8rem",
                   fontWeight: 800,
-                  fontFamily: "'Sora', sans-serif",
+                  fontFamily: "'Archivo', sans-serif",
                   marginTop: 2,
                 }}
               >
@@ -435,14 +435,14 @@ export default function AdminPanel() {
               <Star className="text-emerald" size={20} />
             </div>
             <div>
-              <div style={{ fontSize: 12, color: "#64748b" }} className="mono">
+              <div style={{ fontSize: 12, color: "#7FA3C9" }} className="mono">
                 FEATURED LANDING
               </div>
               <div
                 style={{
                   fontSize: "1.8rem",
                   fontWeight: 800,
-                  fontFamily: "'Sora', sans-serif",
+                  fontFamily: "'Archivo', sans-serif",
                   marginTop: 2,
                 }}
               >
@@ -456,14 +456,14 @@ export default function AdminPanel() {
               <Layers className="text-amber" size={20} />
             </div>
             <div>
-              <div style={{ fontSize: 12, color: "#64748b" }} className="mono">
+              <div style={{ fontSize: 12, color: "#7FA3C9" }} className="mono">
                 DATA STORAGE
               </div>
               <div
                 style={{
                   fontSize: "1.8rem",
                   fontWeight: 800,
-                  fontFamily: "'Sora', sans-serif",
+                  fontFamily: "'Archivo', sans-serif",
                   marginTop: 2,
                 }}
               >
@@ -482,7 +482,7 @@ export default function AdminPanel() {
               >
                 <h3
                   style={{
-                    fontFamily: "'Sora', sans-serif",
+                    fontFamily: "'Archivo', sans-serif",
                     fontWeight: 700,
                     fontSize: "1.2rem",
                   }}
@@ -500,7 +500,7 @@ export default function AdminPanel() {
               <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-5 max-h-[75vh] overflow-y-auto">
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div className="flex flex-col gap-2">
-                    <label className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                    <label className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                       PROJECT TITLE *
                     </label>
                     <input
@@ -514,7 +514,7 @@ export default function AdminPanel() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                    <label className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                       TAGLINE *
                     </label>
                     <input
@@ -530,7 +530,7 @@ export default function AdminPanel() {
 
                 <div className="grid sm:grid-cols-3 gap-5">
                   <div className="flex flex-col gap-2">
-                    <label className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                    <label className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                       YEAR SHIPPED *
                     </label>
                     <input
@@ -544,7 +544,7 @@ export default function AdminPanel() {
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                    <label className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                       ACCENT COLOR
                     </label>
                     <select
@@ -570,7 +570,7 @@ export default function AdminPanel() {
                         onChange={handleCheckboxChange}
                         className="w-5 h-5 rounded border-border bg-input-background text-primary focus:ring-primary focus:ring-offset-background"
                       />
-                      <span className="mono" style={{ fontSize: 11, color: "#e8ecf4" }}>
+                      <span className="mono" style={{ fontSize: 11, color: "#E6EEF7" }}>
                         FEATURE ON LANDING
                       </span>
                     </label>
@@ -578,7 +578,7 @@ export default function AdminPanel() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                  <label className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                     DESCRIPTION *
                   </label>
                   <textarea
@@ -594,7 +594,7 @@ export default function AdminPanel() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                  <label className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                     TECH STACK / TAGS * (comma-separated)
                   </label>
                   <input
@@ -609,7 +609,7 @@ export default function AdminPanel() {
 
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div className="flex flex-col gap-2">
-                      <label className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                      <label className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                         RUN URL
                       </label>
                       <input
@@ -622,7 +622,7 @@ export default function AdminPanel() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                      <label className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                         GITHUB REPOSITORY
                       </label>
                       <input
@@ -637,13 +637,13 @@ export default function AdminPanel() {
 
                 {/* Image Section */}
                 <div className="border border-border rounded-xl p-5 bg-card/30 flex flex-col gap-4">
-                  <div className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                  <div className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                     PROJECT HERO IMAGE (UPLOAD FILE OR PASTE ONLINE URL)
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div className="flex flex-col gap-2">
-                      <label style={{ fontSize: 12, color: "#64748b" }}>
+                      <label style={{ fontSize: 12, color: "#7FA3C9" }}>
                         Upload Local File
                       </label>
                       <input
@@ -661,7 +661,7 @@ export default function AdminPanel() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label style={{ fontSize: 12, color: "#64748b" }}>
+                      <label style={{ fontSize: 12, color: "#7FA3C9" }}>
                         Paste Image URL
                       </label>
                       <input
@@ -676,7 +676,7 @@ export default function AdminPanel() {
 
                   {formData.image && (
                     <div className="mt-2">
-                      <div style={{ fontSize: 12, color: "#64748b", marginBottom: 6 }}>
+                      <div style={{ fontSize: 12, color: "#7FA3C9", marginBottom: 6 }}>
                         Image Preview:
                       </div>
                       <div className="w-full h-36 border border-border rounded-xl overflow-hidden relative">
@@ -699,13 +699,13 @@ export default function AdminPanel() {
 
                 {/* Video Section */}
                 <div className="border border-border rounded-xl p-5 bg-card/30 flex flex-col gap-4">
-                  <div className="mono" style={{ fontSize: 11, color: "#6366f1" }}>
+                  <div className="mono" style={{ fontSize: 11, color: "#FF5C39" }}>
                     PROJECT DEMO VIDEO (UPLOAD FILE TO INDEXEDDB OR PASTE ONLINE URL)
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div className="flex flex-col gap-2">
-                      <label style={{ fontSize: 12, color: "#64748b" }}>
+                      <label style={{ fontSize: 12, color: "#7FA3C9" }}>
                         Upload Local MP4/WebM File
                       </label>
                       <input
@@ -721,14 +721,14 @@ export default function AdminPanel() {
                           cursor-pointer"
                       />
                       {videoFile && (
-                        <span style={{ fontSize: 11, color: "#10b981" }} className="mono">
+                        <span style={{ fontSize: 11, color: "#FF5C39" }} className="mono">
                           ✓ File selected: {videoFile.name}
                         </span>
                       )}
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <label style={{ fontSize: 12, color: "#64748b" }}>
+                      <label style={{ fontSize: 12, color: "#7FA3C9" }}>
                         Paste Video URL / Local Asset Path
                       </label>
                       <input
@@ -744,7 +744,7 @@ export default function AdminPanel() {
                   {editingId && (dbVideoStatus[editingId] || videoFile) && (
                     <div className="mt-1 flex items-center justify-between bg-black/20 p-3 rounded-lg border border-border/40">
                       <div className="flex items-center gap-2">
-                        <span style={{ fontSize: 12, color: "#10b981" }} className="mono">
+                        <span style={{ fontSize: 12, color: "#FF5C39" }} className="mono">
                           🎥 Stored video file exists in IndexedDB
                         </span>
                       </div>
@@ -784,7 +784,7 @@ export default function AdminPanel() {
           <div className="p-6 border-b border-border bg-card/20 flex items-center justify-between">
             <h3
               style={{
-                fontFamily: "'Sora', sans-serif",
+                fontFamily: "'Archivo', sans-serif",
                 fontWeight: 700,
                 fontSize: "1.1rem",
               }}
@@ -840,11 +840,11 @@ export default function AdminPanel() {
                             }}
                           />
                           {p.title}
-                          <span style={{ fontSize: 11, color: "#64748b" }} className="mono">
+                          <span style={{ fontSize: 11, color: "#7FA3C9" }} className="mono">
                             ({p.year})
                           </span>
                         </div>
-                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>
+                        <div style={{ fontSize: 12, color: "#7FA3C9", marginTop: 2 }}>
                           {p.tagline}
                         </div>
                       </td>
@@ -872,9 +872,9 @@ export default function AdminPanel() {
                           <span
                             className="mono text-[10px]"
                             style={{
-                              color: "#10b981",
-                              background: "rgba(16,185,129,0.12)",
-                              border: "1px solid rgba(16,185,129,0.25)",
+                              color: "#FF5C39",
+                              background: "rgba(255,92,57,0.12)",
+                              border: "1px solid rgba(255,92,57,0.3)",
                               padding: "2px 8px",
                               borderRadius: 6,
                             }}
@@ -885,7 +885,7 @@ export default function AdminPanel() {
                           <span
                             className="mono text-[10px]"
                             style={{
-                              color: "#64748b",
+                              color: "#7FA3C9",
                               background: "rgba(255,255,255,0.04)",
                               border: "1px solid rgba(255,255,255,0.06)",
                               padding: "2px 8px",
@@ -901,9 +901,9 @@ export default function AdminPanel() {
                           <span
                             className="mono text-[10px]"
                             style={{
-                              color: "#10b981",
-                              background: "rgba(16,185,129,0.12)",
-                              border: "1px solid rgba(16,185,129,0.25)",
+                              color: "#FF5C39",
+                              background: "rgba(255,92,57,0.12)",
+                              border: "1px solid rgba(255,92,57,0.3)",
                               padding: "2px 8px",
                               borderRadius: 6,
                             }}
@@ -914,9 +914,9 @@ export default function AdminPanel() {
                           <span
                             className="mono text-[10px]"
                             style={{
-                              color: "#6366f1",
-                              background: "rgba(99,102,241,0.12)",
-                              border: "1px solid rgba(99,102,241,0.25)",
+                              color: "#7FA3C9",
+                              background: "rgba(127,163,201,0.12)",
+                              border: "1px solid rgba(127,163,201,0.25)",
                               padding: "2px 8px",
                               borderRadius: 6,
                             }}
@@ -927,7 +927,7 @@ export default function AdminPanel() {
                           <span
                             className="mono text-[10px]"
                             style={{
-                              color: "#64748b",
+                              color: "#7FA3C9",
                               background: "rgba(255,255,255,0.04)",
                               border: "1px solid rgba(255,255,255,0.06)",
                               padding: "2px 8px",

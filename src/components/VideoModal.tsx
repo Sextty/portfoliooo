@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -10,7 +10,9 @@ interface VideoModalProps {
   projectColor?: string;
 }
 
-export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectColor = "#ec4899" }: VideoModalProps) {
+export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectColor = "#FF5C39" }: VideoModalProps) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
   // Prevent background scroll when video is playing
   useEffect(() => {
     if (isOpen) {
@@ -22,6 +24,17 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  // Escape closes the modal; move focus to the close button on open
+  useEffect(() => {
+    if (!isOpen) return;
+    closeButtonRef.current?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
 
   return (
     <AnimatePresence>
@@ -40,13 +53,15 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "rgba(3,7,18,0.85)",
-            backdropFilter: "blur(12px)",
+            background: "rgba(7,21,39,0.92)",
             padding: 20,
           }}
           onClick={onClose}
         >
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Demo video: ${projectTitle}`}
             initial={{ scale: 0.92, y: 15, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.92, y: 15, opacity: 0 }}
@@ -55,11 +70,11 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
               position: "relative",
               width: "100%",
               maxWidth: 800,
-              background: "rgba(15,23,42,0.6)",
-              border: `1px solid ${projectColor}30`,
-              borderRadius: 16,
+              background: "#0b1e36",
+              border: `1px solid ${projectColor}`,
+              borderRadius: 2,
               overflow: "hidden",
-              boxShadow: `0 24px 50px -12px ${projectColor}20`,
+              boxShadow: `0 24px 60px -12px rgba(3,10,20,0.7)`,
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -69,44 +84,48 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                padding: "16px 24px",
-                borderBottom: "1px solid rgba(255,255,255,0.06)",
-                background: "rgba(15,23,42,0.4)",
+                padding: "14px 20px",
+                borderBottom: "1px solid rgba(127,163,201,0.18)",
+                background: "rgba(7,21,39,0.6)",
               }}
             >
               <h3
+                className="mono"
                 style={{
-                  fontFamily: "'Sora', sans-serif",
                   fontWeight: 600,
-                  fontSize: 16,
-                  color: "#f8fafc",
+                  fontSize: 12,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "#e6eef7",
                   margin: 0,
                 }}
               >
-                Demo Recording — {projectTitle}
+                <span style={{ color: projectColor }}>DEMO</span> — {projectTitle}
               </h3>
               <button
+                ref={closeButtonRef}
                 onClick={onClose}
+                aria-label="Close video"
                 style={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   width: 32,
                   height: 32,
-                  borderRadius: "50%",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "#94a3b8",
+                  borderRadius: 2,
+                  background: "transparent",
+                  border: "1px solid rgba(127,163,201,0.28)",
+                  color: "#7fa3c9",
                   cursor: "pointer",
                   transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#f8fafc";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+                  e.currentTarget.style.color = "#ff5c39";
+                  e.currentTarget.style.borderColor = "#ff5c39";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#94a3b8";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                  e.currentTarget.style.color = "#7fa3c9";
+                  e.currentTarget.style.borderColor = "rgba(127,163,201,0.28)";
                 }}
               >
                 <X size={16} />
@@ -114,7 +133,7 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
             </div>
 
             {/* Video Player */}
-            <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", background: "#020617" }}>
+            <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", background: "#071527" }}>
               <video
                 src={videoSrc}
                 controls

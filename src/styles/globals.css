@@ -1,54 +1,47 @@
+/* ═══ BLUEPRINT DESIGN SYSTEM ═══════════════════════════════
+   Drafting Blue sheet · Print White linework · Trace Blue
+   annotations · one Redline accent. No blur, no gradients,
+   no tilt — flat drawing sheets with hairlines and ticks.  */
+
 /* ─── Global Reset & Typography ──────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; font-size: 16px; }
-body { font-family: 'DM Sans', sans-serif; background: #060912; }
-h1, h2, h3, h4, h5 { font-family: 'Sora', sans-serif; }
-.mono { font-family: 'JetBrains Mono', monospace; }
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  /* Archivo carries a width axis; Plex faces ignore this. */
+  font-stretch: 125%;
+}
+body { font-family: 'IBM Plex Sans', sans-serif; background: #0b1e36; }
+h1, h2, h3, h4, h5 { font-family: 'Archivo', sans-serif; }
+.mono { font-family: 'IBM Plex Mono', monospace; }
+
+/* Display plate lettering */
+.display {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.015em;
+}
+
+::selection { background: #ff5c39; color: #071527; }
+
+:focus-visible {
+  outline: 2px solid #ff5c39;
+  outline-offset: 2px;
+}
 
 /* ─── Custom Scrollbar ───────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.35); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(127,163,201,0.4); border-radius: 0; }
 
 /* ─── Keyframe Animations ────────────────────────────────── */
-@keyframes terminal-float {
-  0%, 100% { transform: translateY(0px); }
-  33%      { transform: translateY(-18px); }
-  66%      { transform: translateY(8px); }
-}
-
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
-}
-
 @keyframes bounce-arrow {
   0%, 100% { transform: translateY(0);   opacity: 1; }
   50%      { transform: translateY(9px); opacity: 0.4; }
 }
 
-@keyframes particle {
-  0%   { transform: translateY(0)    translateX(0)    scale(1);   opacity: 0.5; }
-  33%  { transform: translateY(-28px) translateX(14px) scale(1.3); opacity: 1; }
-  66%  { transform: translateY(-8px)  translateX(-18px) scale(0.8); opacity: 0.3; }
-  100% { transform: translateY(0)    translateX(0)    scale(1);   opacity: 0.5; }
-}
-
-@keyframes pulse-ring {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50%     { opacity: 1;   transform: scale(1.06); }
-}
-
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50%     { background-position: 100% 50%; }
-}
-
-@keyframes nav-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.08); }
-  50%     { box-shadow: 0 0 30px rgba(99,102,241,0.18); }
-}
-
+/* Kept for the Girls Boutique demo (its own brand) */
 @keyframes gb-marquee {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -57,146 +50,227 @@ h1, h2, h3, h4, h5 { font-family: 'Sora', sans-serif; }
 /* ─── Animation Utility Classes ──────────────────────────── */
 .bounce-anim { animation: bounce-arrow 2.2s ease-in-out infinite; }
 
-/* ─── Shimmer Gradient Text ──────────────────────────────── */
-.shimmer-text {
-  background: linear-gradient(90deg, #6366f1, #34d399, #818cf8, #34d399, #6366f1);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 4.5s linear infinite;
-}
-
-/* ─── Glassmorphism ──────────────────────────────────────── */
-.glass {
-  background: rgba(12,18,32,0.55);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(99,102,241,0.13);
-}
-
+/* ─── Sheet (flat panel) — .glass kept as alias ──────────── */
+.sheet,
+.glass,
 .glass-em {
-  background: rgba(12,18,32,0.55);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(16,185,129,0.18);
+  background: rgba(7,21,39,0.6);
+  border: 1px solid rgba(127,163,201,0.22);
 }
 
-/* ─── Tilt Card with 3D Perspective ──────────────────────── */
-.tilt-card {
-  transform-style: preserve-3d;
-  transition: transform 0.35s cubic-bezier(.03,.98,.52,.99),
-              box-shadow 0.35s ease;
-  will-change: transform;
+/* ─── Sheet Grid (page background) — .dot-grid kept as alias ─ */
+.sheet-grid,
+.dot-grid {
+  background-image:
+    linear-gradient(rgba(127,163,201,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127,163,201,0.05) 1px, transparent 1px),
+    linear-gradient(rgba(127,163,201,0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127,163,201,0.09) 1px, transparent 1px);
+  background-size: 24px 24px, 24px 24px, 96px 96px, 96px 96px;
 }
 
-.tilt-card:hover {
-  box-shadow: 0 24px 64px rgba(99,102,241,0.18),
-              0 8px 24px rgba(0,0,0,0.5);
+/* ─── Drawing Frame (fixed sheet border with crosshair corners) ─ */
+.drawing-frame {
+  position: fixed;
+  inset: 10px;
+  pointer-events: none;
+  z-index: 60;
+  border: 1px solid rgba(127,163,201,0.25);
+}
+.drawing-frame::before,
+.drawing-frame::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(#7fa3c9,#7fa3c9) left top / 10px 1px,
+    linear-gradient(#7fa3c9,#7fa3c9) left top / 1px 10px,
+    linear-gradient(#7fa3c9,#7fa3c9) right bottom / 10px 1px,
+    linear-gradient(#7fa3c9,#7fa3c9) right bottom / 1px 10px;
+  background-repeat: no-repeat;
+}
+.drawing-frame::after {
+  background:
+    linear-gradient(#7fa3c9,#7fa3c9) right top / 10px 1px,
+    linear-gradient(#7fa3c9,#7fa3c9) right top / 1px 10px,
+    linear-gradient(#7fa3c9,#7fa3c9) left bottom / 10px 1px,
+    linear-gradient(#7fa3c9,#7fa3c9) left bottom / 1px 10px;
+  background-repeat: no-repeat;
 }
 
-/* ─── Card Shine Effect ──────────────────────────────────── */
-.card-shine {
-  position: absolute; inset: 0; border-radius: inherit;
-  background: radial-gradient(circle at var(--mx,50%) var(--my,50%),
-    rgba(99,102,241,0.18) 0%, transparent 62%);
-  opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+/* ─── Corner Ticks (photo / card registration marks) ─────── */
+.corner-ticks { position: relative; }
+.corner-ticks::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+  pointer-events: none;
+  background:
+    linear-gradient(#7fa3c9,#7fa3c9) left top / 14px 1.5px,
+    linear-gradient(#7fa3c9,#7fa3c9) left top / 1.5px 14px,
+    linear-gradient(#7fa3c9,#7fa3c9) right top / 14px 1.5px,
+    linear-gradient(#7fa3c9,#7fa3c9) right top / 1.5px 14px,
+    linear-gradient(#7fa3c9,#7fa3c9) left bottom / 14px 1.5px,
+    linear-gradient(#7fa3c9,#7fa3c9) left bottom / 1.5px 14px,
+    linear-gradient(#7fa3c9,#7fa3c9) right bottom / 14px 1.5px,
+    linear-gradient(#7fa3c9,#7fa3c9) right bottom / 1.5px 14px;
+  background-repeat: no-repeat;
 }
 
-.tilt-card:hover .card-shine { opacity: 1; }
+/* ─── Dimension Line — .gradient-line kept as alias ──────── */
+.dimension-line,
+.gradient-line {
+  height: 9px;
+  position: relative;
+  background:
+    linear-gradient(rgba(127,163,201,0.45), rgba(127,163,201,0.45)) center / 100% 1px no-repeat;
+}
+.dimension-line::before,
+.gradient-line::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: rgba(127,163,201,0.6);
+}
+.dimension-line::after,
+.gradient-line::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: rgba(127,163,201,0.6);
+}
 
-/* ─── Glow Inputs ────────────────────────────────────────── */
+/* ─── Rubber Stamp ───────────────────────────────────────── */
+.stamp {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ff5c39;
+  border: 2px solid #ff5c39;
+  outline: 1px solid rgba(255,92,57,0.45);
+  outline-offset: 3px;
+  padding: 7px 12px;
+  background: rgba(11,30,54,0.9);
+  transform: rotate(-4deg);
+}
+
+/* ─── Inputs — .glow-input kept, restyled flat ────────────── */
 .glow-input {
-  background: rgba(9,14,28,0.7);
-  border: 1px solid rgba(99,102,241,0.22);
-  color: #e8ecf4;
-  font-family: 'DM Sans', sans-serif;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: rgba(7,21,39,0.75);
+  border: 1px solid rgba(127,163,201,0.3);
+  border-radius: 2px;
+  color: #e6eef7;
+  font-family: 'IBM Plex Sans', sans-serif;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
 }
-
-.glow-input::placeholder { color: #4a5568; }
-
-.glow-input:focus {
-  border-color: rgba(99,102,241,0.75);
-  box-shadow: 0 0 0 1px rgba(99,102,241,0.28),
-              0 0 24px rgba(99,102,241,0.12);
-}
-
+.glow-input::placeholder { color: rgba(127,163,201,0.55); }
+.glow-input:focus,
 .glow-input-em:focus {
-  border-color: rgba(16,185,129,0.75);
-  box-shadow: 0 0 0 1px rgba(16,185,129,0.25),
-              0 0 24px rgba(16,185,129,0.10);
+  border-color: #ff5c39;
+  box-shadow: 0 0 0 1px rgba(255,92,57,0.35);
 }
 
-/* ─── Dot Grid Background ───────────────────────────────── */
-.dot-grid {
-  background-image: radial-gradient(circle, rgba(99,102,241,0.06) 1px, transparent 1px);
-  background-size: 44px 44px;
-}
-
-/* ─── Gradient Line Separator ────────────────────────────── */
-.gradient-line {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.5), rgba(16,185,129,0.5), transparent);
-}
-
-/* ─── Tech Card Hover Effects ────────────────────────────── */
+/* ─── Card hover — .tech-hover kept, flattened ────────────── */
 .tech-hover {
-  transition: transform 0.35s cubic-bezier(.03,.98,.52,.99),
-              box-shadow 0.35s ease, border-color 0.35s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
-
-.tech-hover:hover {
-  transform: perspective(600px) rotateY(6deg) rotateX(-4deg) scale(1.03);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(99,102,241,0.1);
-  border-color: rgba(99,102,241,0.35) !important;
-}
-
+.tech-hover:hover,
 .em-hover:hover {
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 32px rgba(16,185,129,0.12);
-  border-color: rgba(16,185,129,0.4) !important;
-}
-
-/* ─── Buttons ────────────────────────────────────────────── */
-.btn-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-family: 'Sora', sans-serif;
-  font-weight: 600;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
-  position: relative; overflow: hidden;
-}
-
-.btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(99,102,241,0.45);
-  filter: brightness(1.1);
+  box-shadow: 0 10px 28px rgba(3,10,20,0.55);
+  border-color: rgba(255,92,57,0.55) !important;
+}
+
+/* ─── Buttons — old names kept, blueprint styling ─────────── */
+.btn-primary {
+  background: #ff5c39;
+  color: #071527;
+  border: 1px solid #ff5c39;
+  border-radius: 2px;
+  cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-primary:hover {
+  background: #ff7a5c;
+  border-color: #ff7a5c;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255,92,57,0.3);
 }
 
 .btn-ghost {
   background: transparent;
-  border: 1px solid rgba(99,102,241,0.35);
-  color: #818cf8;
+  border: 1px solid rgba(127,163,201,0.5);
+  border-radius: 2px;
+  color: #e6eef7;
   cursor: pointer;
-  font-family: 'Sora', sans-serif;
+  font-family: 'IBM Plex Mono', monospace;
   font-weight: 600;
-  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
-
 .btn-ghost:hover {
-  border-color: rgba(99,102,241,0.8);
-  background: rgba(99,102,241,0.08);
-  transform: translateY(-2px);
+  border-color: #ff5c39;
+  color: #ff5c39;
+  background: rgba(255,92,57,0.06);
+  transform: translateY(-1px);
 }
 
-/* ─── Section Tag ────────────────────────────────────────── */
+/* ─── Figure Tag — .section-tag kept as alias ─────────────── */
+.fig-tag,
 .section-tag {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'IBM Plex Mono', monospace;
   font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #6366f1;
+  color: #ff5c39;
+}
+
+/* ─── Title Block (drawing footer table) ─────────────────── */
+.title-block {
+  border: 1px solid rgba(127,163,201,0.3);
+}
+.title-block .tb-cell {
+  border: 1px solid rgba(127,163,201,0.18);
+  padding: 10px 14px;
+}
+.tb-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(127,163,201,0.8);
+  display: block;
+  margin-bottom: 3px;
+}
+.tb-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: #e6eef7;
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

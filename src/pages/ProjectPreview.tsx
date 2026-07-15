@@ -4,6 +4,7 @@ import { ArrowLeft, Github, Download, Play, Video } from "lucide-react";
 import { motion } from "motion/react";
 import { getProjects } from "@/utils/projectDb";
 import { VideoModal } from "@/components/VideoModal";
+import { COLORS, FONTS } from "@/theme/palette";
 
 interface ProjectExtra {
   features: string[];
@@ -91,16 +92,19 @@ const PROJECT_EXTRAS: Record<string, ProjectExtra> = {
   }
 };
 
-const highlightCode = (code: string, color: string = "#ec4899") => {
+const highlightCode = (code: string) => {
   let html = code
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
-  // Highlight comments
-  html = html.replace(/^(\s*)(\/\/|#|--)(.*)$/gm, '$1<span style="color: #64748b; font-style: italic;">$2$3</span>');
+  // Highlight comments (Trace Blue, italic)
+  html = html.replace(
+    /^(\s*)(\/\/|#|--)(.*)$/gm,
+    `$1<span style="color: ${COLORS.trace}; opacity: 0.7; font-style: italic;">$2$3</span>`
+  );
 
-  // Keywords list
+  // Keywords list — rendered in Redline
   const keywords = [
     "const", "function", "export", "default", "import", "from", "return", "def", "async", "await", "let", "var",
     "CREATE TABLE", "INT AUTO_INCREMENT PRIMARY KEY", "VARCHAR", "DECIMAL", "FOREIGN KEY", "REFERENCES",
@@ -109,13 +113,62 @@ const highlightCode = (code: string, color: string = "#ec4899") => {
 
   keywords.forEach(kw => {
     const regex = new RegExp(`\\b${kw}\\b`, 'g');
-    html = html.replace(regex, `<span style="color: ${color}">${kw}</span>`);
+    html = html.replace(regex, `<span style="color: ${COLORS.redline}">${kw}</span>`);
   });
 
-  // Strings between quotes
-  html = html.replace(/(['"`])(.*?)\1/g, '<span style="color: #10b981">$1$2$1</span>');
+  // Strings between quotes (Print White)
+  html = html.replace(
+    /(['"`])(.*?)\1/g,
+    `<span style="color: ${COLORS.print}">$1$2$1</span>`
+  );
 
   return html;
+};
+
+/* Blueprint subfigure heading */
+function FigHeading({ fig, title }: { fig: string; title: string }) {
+  return (
+    <div className="mb-4">
+      <span
+        className="mono"
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: "0.16em",
+          color: COLORS.redline,
+        }}
+      >
+        {fig}
+      </span>
+      <span
+        className="mono"
+        style={{
+          fontSize: 10,
+          letterSpacing: "0.16em",
+          color: COLORS.trace,
+          marginLeft: 8,
+        }}
+      >
+        — {title}
+      </span>
+    </div>
+  );
+}
+
+const actionBtn: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 8,
+  padding: "12px 24px",
+  borderRadius: 2,
+  fontSize: 12,
+  fontWeight: 600,
+  fontFamily: FONTS.mono,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
+  textDecoration: "none",
+  cursor: "pointer",
+  transition: "transform 0.2s, border-color 0.2s, color 0.2s, background 0.2s",
 };
 
 export default function ProjectPreview() {
@@ -130,14 +183,17 @@ export default function ProjectPreview() {
   useEffect(() => {
     if (!project) return;
     let active = true;
+    // Track the created URL locally so cleanup revokes the right one
+    // (state in the closure would be stale by the time cleanup runs).
+    let createdUrl: string | null = null;
     const checkVideo = async () => {
       try {
         const { getVideo } = await import("@/utils/videoDb");
         const blob = await getVideo(project.id);
         if (blob && active) {
+          createdUrl = URL.createObjectURL(blob);
           setHasDbVideo(true);
-          const url = URL.createObjectURL(blob);
-          setDbVideoUrl(url);
+          setDbVideoUrl(createdUrl);
         }
       } catch (e) {
         console.error("IndexedDB error", e);
@@ -146,8 +202,8 @@ export default function ProjectPreview() {
     checkVideo();
     return () => {
       active = false;
-      if (dbVideoUrl) {
-        URL.revokeObjectURL(dbVideoUrl);
+      if (createdUrl) {
+        URL.revokeObjectURL(createdUrl);
       }
     };
   }, [project?.id]);
@@ -155,9 +211,10 @@ export default function ProjectPreview() {
   if (!project) {
     return (
       <div
+        className="sheet-grid"
         style={{
-          background: "#060912",
-          color: "#e8ecf4",
+          background: COLORS.ground,
+          color: COLORS.print,
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
@@ -166,16 +223,31 @@ export default function ProjectPreview() {
           gap: 16,
         }}
       >
-        <h1 style={{ fontFamily: "'Sora', sans-serif", fontSize: 24, fontWeight: 800 }}>Project Not Found</h1>
-        <p style={{ color: "#94a3b8" }}>The project you are looking for does not exist.</p>
-        <Link to="/" style={{ color: "#ec4899", textDecoration: "none", fontSize: 14 }}>
-          Back to Portfolio
+        <h1 className="display" style={{ fontSize: 24, color: COLORS.print }}>
+          Sheet Not Found
+        </h1>
+        <p style={{ color: COLORS.trace }}>
+          The drawing you are looking for does not exist.
+        </p>
+        <Link
+          to="/"
+          className="mono"
+          style={{
+            color: COLORS.redline,
+            textDecoration: "none",
+            fontSize: 12,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+          }}
+        >
+          ← Back to Portfolio
         </Link>
       </div>
     );
   }
 
-  const projectColor = project.color || "#ec4899";
+  // The project's stored color survives only as a small index swatch.
+  const indexColor = project.color || COLORS.redline;
 
   const extra = PROJECT_EXTRAS[project.id] || {
     features: [
@@ -197,19 +269,21 @@ export default function ProjectPreview() {
 
   return (
     <div
+      className="sheet-grid"
       style={{
-        background: "#060912",
-        color: "#e8ecf4",
+        background: COLORS.ground,
+        color: COLORS.print,
         minHeight: "100vh",
       }}
     >
+      <div className="drawing-frame hidden md:block" />
+
       {/* Nav */}
       <header
         style={{
           height: 64,
-          background: "rgba(6,9,18,0.85)",
-          backdropFilter: "blur(20px)",
-          borderBottom: `1px solid ${projectColor}20`,
+          background: "rgba(11,30,54,0.94)",
+          borderBottom: `1px solid ${COLORS.line}`,
           display: "flex",
           alignItems: "center",
           padding: "0 24px",
@@ -222,27 +296,29 @@ export default function ProjectPreview() {
       >
         <Link
           to="/"
+          className="mono"
           style={{
             display: "flex",
             alignItems: "center",
             gap: 8,
-            color: "#94a3b8",
+            color: COLORS.trace,
             textDecoration: "none",
-            fontSize: 14,
-            fontWeight: 500,
+            fontSize: 11,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
           }}
         >
-          <ArrowLeft size={16} /> Back to Portfolio
+          <ArrowLeft size={15} /> Back to Portfolio
         </Link>
       </header>
 
       <main
         style={{
-          paddingTop: 96,
+          paddingTop: 104,
           paddingBottom: 60,
           paddingLeft: 24,
           paddingRight: 24,
-          maxWidth: 800,
+          maxWidth: 820,
           margin: "0 auto",
         }}
       >
@@ -251,32 +327,37 @@ export default function ProjectPreview() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <span
-            className="mono"
-            style={{
-              fontSize: 11,
-              color: projectColor,
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              border: `1px solid ${projectColor}40`,
-              background: `${projectColor}15`,
-              padding: "4px 12px",
-              borderRadius: 16,
-              display: "inline-block",
-              marginBottom: 16,
-            }}
-          >
-            ✦ Project Preview
-          </span>
+          {/* Sheet title block */}
+          <div className="title-block grid grid-cols-2 sm:grid-cols-4 mb-8">
+            <div className="tb-cell">
+              <span className="tb-label">Drawing</span>
+              <span className="tb-value" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span aria-hidden="true" style={{ width: 9, height: 9, background: indexColor, display: "inline-block" }} />
+                {project.id.toUpperCase()}
+              </span>
+            </div>
+            <div className="tb-cell">
+              <span className="tb-label">Year</span>
+              <span className="tb-value">{project.year}</span>
+            </div>
+            <div className="tb-cell">
+              <span className="tb-label">Rev</span>
+              <span className="tb-value">A</span>
+            </div>
+            <div className="tb-cell">
+              <span className="tb-label">Scale</span>
+              <span className="tb-value">1:1</span>
+            </div>
+          </div>
 
+          <p className="fig-tag mb-3">FIG. 00 — SHEET DETAIL</p>
           <h1
+            className="display"
             style={{
-              fontFamily: "'Sora', sans-serif",
-              fontWeight: 800,
-              fontSize: "clamp(2rem, 5vw, 3.2rem)",
-              color: "#f8fafc",
+              fontSize: "clamp(2rem, 5vw, 3rem)",
+              color: COLORS.print,
               marginBottom: 8,
-              letterSpacing: "-0.03em",
+              lineHeight: 1.05,
             }}
           >
             {project.title}
@@ -285,8 +366,8 @@ export default function ProjectPreview() {
           <p
             style={{
               fontSize: 16,
-              color: "#94a3b8",
-              marginBottom: 32,
+              color: COLORS.trace,
+              marginBottom: 28,
               lineHeight: 1.6,
             }}
           >
@@ -294,25 +375,17 @@ export default function ProjectPreview() {
           </p>
 
           {/* Tech tags */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 8,
-              marginBottom: 32,
-            }}
-          >
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 32 }}>
             {project.tags.map((t) => (
               <span
                 key={t}
                 className="mono"
                 style={{
-                  fontSize: 12,
-                  color: projectColor,
-                  background: `${projectColor}15`,
-                  border: `1px solid ${projectColor}30`,
-                  padding: "4px 12px",
-                  borderRadius: 6,
+                  fontSize: 11,
+                  color: COLORS.trace,
+                  border: `1px solid ${COLORS.lineFaint}`,
+                  padding: "4px 10px",
+                  letterSpacing: "0.04em",
                 }}
               >
                 {t}
@@ -321,35 +394,15 @@ export default function ProjectPreview() {
           </div>
 
           {/* Buttons */}
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 44 }}>
             {project.runUrl && (() => {
               const isInternal = project.runUrl.startsWith("/");
               const buttonEl = (
                 <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "12px 28px",
-                    borderRadius: 10,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    textDecoration: "none",
-                    background: `linear-gradient(135deg, ${projectColor}, ${projectColor}cc)`,
-                    color: "white",
-                    cursor: "pointer",
-                    transition: "transform 0.2s, box-shadow 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.boxShadow = `0 8px 24px ${projectColor}55`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "";
-                    e.currentTarget.style.boxShadow = "";
-                  }}
+                  className="btn-primary"
+                  style={{ ...actionBtn, color: COLORS.field }}
                 >
-                  <Play size={16} fill="white" /> Live Demo
+                  <Play size={15} fill="currentColor" /> Live Demo
                 </span>
               );
               return isInternal ? (
@@ -365,33 +418,11 @@ export default function ProjectPreview() {
 
             {(project.videoUrl || hasDbVideo) && (
               <button
-                onClick={() => setPlayingVideo({ src: dbVideoUrl || project.videoUrl!, title: project.title, color: projectColor })}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "12px 28px",
-                  borderRadius: 10,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  border: `1px solid ${projectColor}50`,
-                  background: `${projectColor}15`,
-                  color: projectColor,
-                  cursor: "pointer",
-                  transition: "transform 0.2s, box-shadow 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.background = `${projectColor}25`;
-                  e.currentTarget.style.boxShadow = `0 8px 24px ${projectColor}35`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "";
-                  e.currentTarget.style.background = `${projectColor}15`;
-                  e.currentTarget.style.boxShadow = "";
-                }}
+                onClick={() => setPlayingVideo({ src: dbVideoUrl || project.videoUrl!, title: project.title, color: COLORS.redline })}
+                className="btn-ghost"
+                style={actionBtn}
               >
-                <Video size={16} /> Watch Demo
+                <Video size={15} /> Watch Demo
               </button>
             )}
 
@@ -401,57 +432,17 @@ export default function ProjectPreview() {
                   href={project.githubUrl}
                   target="_blank"
                   rel="noreferrer"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "12px 28px",
-                    borderRadius: 10,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    textDecoration: "none",
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "#94a3b8",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-2px)";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = projectColor;
-                    (e.currentTarget as HTMLAnchorElement).style.color = "#f8fafc";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.transform = "";
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.08)";
-                    (e.currentTarget as HTMLAnchorElement).style.color = "#94a3b8";
-                  }}
+                  className="btn-ghost"
+                  style={actionBtn}
                 >
-                  <Github size={16} /> View Source Code
+                  <Github size={15} /> View Source
                 </a>
                 <a
                   href={`${project.githubUrl}/archive/main.zip`}
                   className="btn-ghost"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "12px 28px",
-                    borderRadius: 10,
-                    fontSize: 14,
-                    fontWeight: 600,
-                    textDecoration: "none",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    color: "#94a3b8",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = projectColor;
-                    (e.currentTarget as HTMLAnchorElement).style.color = "#f8fafc";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.15)";
-                    (e.currentTarget as HTMLAnchorElement).style.color = "#94a3b8";
-                  }}
+                  style={actionBtn}
                 >
-                  <Download size={16} /> Download ZIP
+                  <Download size={15} /> Download ZIP
                 </a>
               </>
             )}
@@ -461,148 +452,110 @@ export default function ProjectPreview() {
           <p
             style={{
               fontSize: 15,
-              color: "#94a3b8",
+              color: COLORS.trace,
               lineHeight: 1.75,
-              marginBottom: 36,
+              marginBottom: 40,
+              paddingBottom: 40,
+              borderBottom: `1px solid ${COLORS.lineFaint}`,
             }}
           >
             {project.description}
           </p>
 
           {/* Features */}
-          <h3
-            style={{
-              fontFamily: "'Sora', sans-serif",
-              fontWeight: 700,
-              fontSize: 14,
-              color: projectColor,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              marginBottom: 14,
-            }}
-          >
-            ✦ Features
-          </h3>
+          <FigHeading fig="FIG. 01" title="Features" />
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
               gap: 10,
-              marginBottom: 40,
+              marginBottom: 44,
             }}
           >
             {extra.features.map((f) => (
               <div
                 key={f}
+                className="sheet"
                 style={{
                   padding: "12px 16px",
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  borderRadius: 8,
                   fontSize: 14,
-                  color: "#cbd5e1",
+                  color: COLORS.print,
                   display: "flex",
                   alignItems: "center",
                   gap: 10,
                 }}
               >
-                <span style={{ color: projectColor, fontSize: 12 }}>✦</span>
+                <span style={{ color: COLORS.redline, fontSize: 12 }}>+</span>
                 {f}
               </div>
             ))}
           </div>
 
           {/* Code preview */}
-          <h3
-            style={{
-              fontFamily: "'Sora', sans-serif",
-              fontWeight: 700,
-              fontSize: 14,
-              color: projectColor,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              marginBottom: 14,
-            }}
-          >
-            🖥 Code Preview
-          </h3>
+          <FigHeading fig="FIG. 02" title={`Detail — ${extra.codeFileName}`} />
           <div
             style={{
-              background: "rgba(15,15,25,0.8)",
-              border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: 12,
+              background: COLORS.field,
+              border: `1px solid ${COLORS.line}`,
+              borderRadius: 2,
               overflow: "hidden",
-              marginBottom: 40,
+              marginBottom: 44,
             }}
           >
             <div
               style={{
                 padding: "10px 16px",
-                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                borderBottom: `1px solid ${COLORS.lineFaint}`,
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
               }}
             >
-              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
-              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
-              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#10b981", display: "inline-block" }} />
-              <span className="mono" style={{ fontSize: 12, color: "#94a3b8", marginLeft: 8 }}>{extra.codeFileName}</span>
+              <span style={{ width: 8, height: 8, background: COLORS.redline, display: "inline-block" }} />
+              <span className="mono" style={{ fontSize: 11, color: COLORS.trace, marginLeft: 4, letterSpacing: "0.1em" }}>
+                {extra.codeFileName}
+              </span>
             </div>
             <pre
               className="mono"
-              style={{ padding: 20, fontSize: 13, lineHeight: 1.8, color: "#94a3b8", overflowX: "auto" }}
-              dangerouslySetInnerHTML={{ __html: highlightCode(extra.codeSnippet, projectColor) }}
+              style={{ padding: 20, fontSize: 13, lineHeight: 1.8, color: COLORS.trace, overflowX: "auto" }}
+              dangerouslySetInnerHTML={{ __html: highlightCode(extra.codeSnippet) }}
             />
           </div>
 
           {/* Setup */}
-          <h3
-            style={{
-              fontFamily: "'Sora', sans-serif",
-              fontWeight: 700,
-              fontSize: 14,
-              color: projectColor,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              marginBottom: 14,
-            }}
-          >
-            ⚡ Run Locally
-          </h3>
+          <FigHeading fig="FIG. 03" title="Assembly — Run Locally" />
           {extra.setupSteps.map((step, i) => (
             <div
               key={i}
+              className="sheet"
               style={{
                 display: "flex",
                 alignItems: "flex-start",
                 gap: 14,
                 padding: "14px 18px",
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.06)",
-                borderRadius: 10,
                 marginBottom: 10,
                 fontSize: 14,
-                color: "#cbd5e1",
+                color: COLORS.print,
                 lineHeight: 1.6,
               }}
             >
               <span
+                className="mono"
                 style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  background: `${projectColor}25`,
-                  color: projectColor,
+                  width: 26,
+                  height: 26,
+                  border: `1px solid ${COLORS.redline}`,
+                  color: COLORS.redline,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 12,
-                  fontWeight: 700,
+                  fontSize: 11,
+                  fontWeight: 600,
                   flexShrink: 0,
                 }}
               >
-                {i + 1}
+                {String(i + 1).padStart(2, "0")}
               </span>
               <span>{step}</span>
             </div>
@@ -613,15 +566,15 @@ export default function ProjectPreview() {
       {/* Footer */}
       <footer
         style={{
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: `1px solid ${COLORS.lineFaint}`,
           padding: "24px 0",
           textAlign: "center",
         }}
       >
-        <p style={{ fontSize: 13, color: "#4a5568" }}>
-          Built with React & TypeScript —{" "}
-          <Link to="/" style={{ color: projectColor, textDecoration: "none" }}>
-            Wassim Jebali's Portfolio
+        <p className="mono" style={{ fontSize: 11, color: COLORS.trace, letterSpacing: "0.08em" }}>
+          BUILT WITH REACT & TYPESCRIPT —{" "}
+          <Link to="/" style={{ color: COLORS.redline, textDecoration: "none" }}>
+            WASSIM JEBALI&apos;S PORTFOLIO
           </Link>
         </p>
       </footer>

@@ -1,15 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { ScrollProgress } from "@/components/ScrollProgress";
 import { SectionDivider } from "@/components/SectionDivider";
 import { SectionEntrance } from "@/components/SectionEntrance";
-import { CodeTerminal } from "@/components/CodeTerminal";
+import { BlueprintSchematic } from "@/components/BlueprintSchematic";
+import { ProjectCard } from "@/components/ProjectCard";
 import { useActiveSection } from "@/utils/useActiveSection";
 import profilePhoto from "@/assets/profile.jpg";
 import { getProjects, Project } from "@/utils/projectDb";
 import { VideoModal } from "@/components/VideoModal";
+import { COLORS, FONTS } from "@/theme/palette";
 import {
   Github,
   ExternalLink,
@@ -22,52 +24,47 @@ import {
   Terminal,
   Send,
   ArrowUpRight,
-  Play,
+  Menu,
+  X,
 } from "lucide-react";
 
-/* ─── Keyframes and animations defined in styles/theme.css ─── */
+/* ─── Blueprint tokens live in styles/theme.css + globals.css ─── */
 
 const techCategories = [
   {
     name: "Frontend",
+    ref: "BOM-01",
     icon: Globe,
-    color: "#6366f1",
-    glow: "rgba(99,102,241,0.18)",
     items: ["HTML", "CSS", "JavaScript", "React", "Bootstrap", "Next.js"],
   },
   {
     name: "Backend",
+    ref: "BOM-02",
     icon: Server,
-    color: "#10b981",
-    glow: "rgba(16,185,129,0.18)",
     items: ["Node.js", "PHP", "Laravel"],
   },
   {
     name: "Database",
+    ref: "BOM-03",
     icon: Database,
-    color: "#f59e0b",
-    glow: "rgba(245,158,11,0.18)",
     items: ["MySQL", "NoSQL", "MongoDB"],
   },
   {
     name: "Tools & APIs",
+    ref: "BOM-04",
     icon: Terminal,
-    color: "#8b5cf6",
-    glow: "rgba(139,92,246,0.18)",
     items: ["Git", "REST APIs", "Postman"],
   },
 ];
 
-const stats = [
-  { value: "3+", label: "Years Experience" },
-  { value: "24+", label: "Projects Shipped" },
-  { value: "8+", label: "Technologies" },
-  { value: "100%", label: "Dedication" },
+const specs = [
+  { label: "Location", value: "Tunis, TN" },
+  { label: "Timezone", value: "UTC+1" },
+  { label: "Experience", value: "3+ years" },
+  { label: "Core stack", value: "React · PHP · MySQL" },
 ];
 
-/* ─── Orb replaced by CodeTerminal component ─────────────── */
-
-/* ─── Navbar ─────────────────────────────────────────────── */
+/* ─── Navbar (drawing header strip) ──────────────────────── */
 function Navbar({
   scrolled,
   activeSection,
@@ -76,19 +73,29 @@ function Navbar({
   activeSection: string;
 }) {
   const links = ["About", "Projects", "Contact"];
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const getLinkStyle = (link: string) => {
-    const isActive = activeSection === link.toLowerCase();
-    return {
-      fontFamily: "'DM Sans', sans-serif",
-      fontSize: 14,
-      fontWeight: isActive ? 600 : 500,
-      color: isActive ? "#e8ecf4" : "#94a3b8",
-      textDecoration: "none",
-      transition: "color 0.25s ease, font-weight 0.25s ease",
-      position: "relative" as const,
+  // Close the mobile menu automatically if the viewport grows past md
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onChange = () => {
+      if (mq.matches) setMenuOpen(false);
     };
-  };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const linkStyle = (isActive: boolean) => ({
+    fontFamily: FONTS.mono,
+    fontSize: 12,
+    fontWeight: 500,
+    letterSpacing: "0.14em",
+    textTransform: "uppercase" as const,
+    color: isActive ? COLORS.redline : COLORS.trace,
+    textDecoration: "none",
+    transition: "color 0.2s ease",
+    position: "relative" as const,
+  });
 
   return (
     <motion.nav
@@ -98,51 +105,64 @@ function Navbar({
       className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 md:px-16"
       style={{
         height: 72,
-        background: scrolled
-          ? "rgba(6,9,18,0.85)"
-          : "transparent",
-        backdropFilter: scrolled ? "blur(20px)" : "none",
-        borderBottom: scrolled
-          ? "1px solid rgba(99,102,241,0.12)"
-          : "none",
-        transition: "all 0.4s ease",
+        background: scrolled || menuOpen ? "rgba(11,30,54,0.94)" : "transparent",
+        borderBottom:
+          scrolled || menuOpen
+            ? `1px solid ${COLORS.line}`
+            : "1px solid transparent",
+        transition: "background 0.3s ease, border-color 0.3s ease",
       }}
     >
-      {/* Logo */}
+      {/* Nameplate */}
       <div className="flex items-center gap-3">
         <div
           style={{
             width: 36,
             height: 36,
-            borderRadius: 10,
-            background: "linear-gradient(135deg, #6366f1, #10b981)",
+            border: `1.5px solid ${COLORS.print}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            flexShrink: 0,
           }}
         >
           <span
             style={{
-              fontFamily: "'Sora', sans-serif",
+              fontFamily: FONTS.display,
               fontWeight: 800,
-              fontSize: 15,
-              color: "white",
+              fontSize: 13,
+              color: COLORS.print,
             }}
           >
             WJ
           </span>
         </div>
-        <span
-          style={{
-            fontFamily: "'Sora', sans-serif",
-            fontWeight: 700,
-            fontSize: 15,
-            color: "#e8ecf4",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Wassim Jebali
-        </span>
+        <div>
+          <div
+            style={{
+              fontFamily: FONTS.display,
+              fontWeight: 700,
+              fontSize: 13,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: COLORS.print,
+              lineHeight: 1.2,
+            }}
+          >
+            Wassim Jebali
+          </div>
+          <div
+            className="mono"
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.14em",
+              color: COLORS.trace,
+              marginTop: 2,
+            }}
+          >
+            DWG NO. WJ-2026 · REV C
+          </div>
+        </div>
       </div>
 
       {/* Links */}
@@ -153,12 +173,14 @@ function Navbar({
             <a
               key={l}
               href={`#${l.toLowerCase()}`}
-              style={getLinkStyle(l)}
+              style={linkStyle(isActive)}
               onMouseEnter={(e) =>
-                ((e.target as HTMLAnchorElement).style.color = "#e8ecf4")
+                ((e.target as HTMLAnchorElement).style.color = COLORS.print)
               }
               onMouseLeave={(e) =>
-                ((e.target as HTMLAnchorElement).style.color = isActive ? "#e8ecf4" : "#94a3b8")
+                ((e.target as HTMLAnchorElement).style.color = isActive
+                  ? COLORS.redline
+                  : COLORS.trace)
               }
             >
               {l}
@@ -167,12 +189,11 @@ function Navbar({
                   layoutId="nav-indicator"
                   style={{
                     position: "absolute",
-                    bottom: -4,
-                    left: "20%",
-                    right: "20%",
+                    bottom: -6,
+                    left: 0,
+                    right: 0,
                     height: 2,
-                    borderRadius: 1,
-                    background: "#6366f1",
+                    background: COLORS.redline,
                   }}
                 />
               )}
@@ -181,31 +202,113 @@ function Navbar({
         })}
         <Link
           to="/projects"
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14,
-            fontWeight: 500,
-            color: "#94a3b8",
-            textDecoration: "none",
-            transition: "color 0.25s ease",
-          }}
+          style={linkStyle(false)}
           onMouseEnter={(e) =>
-            ((e.target as HTMLAnchorElement).style.color = "#e8ecf4")
+            ((e.target as HTMLAnchorElement).style.color = COLORS.print)
           }
           onMouseLeave={(e) =>
-            ((e.target as HTMLAnchorElement).style.color = "#94a3b8")
+            ((e.target as HTMLAnchorElement).style.color = COLORS.trace)
           }
         >
-          Project Zone
+          All Projects
         </Link>
         <a
           href="#contact"
-          className="btn-primary px-5 py-2 rounded-xl text-sm"
+          className="btn-primary px-5 py-2 text-xs"
           style={{ textDecoration: "none", display: "inline-block" }}
         >
           Hire Me
         </a>
       </div>
+
+      {/* Mobile menu toggle */}
+      <button
+        className="md:hidden flex items-center justify-center"
+        onClick={() => setMenuOpen((o) => !o)}
+        aria-expanded={menuOpen}
+        aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+        style={{
+          width: 40,
+          height: 40,
+          background: "transparent",
+          border: `1px solid ${COLORS.line}`,
+          borderRadius: 2,
+          color: COLORS.print,
+          cursor: "pointer",
+        }}
+      >
+        {menuOpen ? <X size={18} /> : <Menu size={18} />}
+      </button>
+
+      {/* Mobile dropdown */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="md:hidden absolute left-0 right-0 flex flex-col px-8 py-6 gap-1"
+            style={{
+              top: 72,
+              background: "rgba(7,21,39,0.98)",
+              borderBottom: `1px solid ${COLORS.line}`,
+            }}
+          >
+            {links.map((l) => (
+              <a
+                key={l}
+                href={`#${l.toLowerCase()}`}
+                onClick={() => setMenuOpen(false)}
+                className="mono"
+                style={{
+                  fontSize: 14,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color:
+                    activeSection === l.toLowerCase()
+                      ? COLORS.redline
+                      : COLORS.trace,
+                  textDecoration: "none",
+                  padding: "12px 0",
+                  borderBottom: `1px solid ${COLORS.lineFaint}`,
+                }}
+              >
+                {l}
+              </a>
+            ))}
+            <Link
+              to="/projects"
+              onClick={() => setMenuOpen(false)}
+              className="mono"
+              style={{
+                fontSize: 14,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: COLORS.trace,
+                textDecoration: "none",
+                padding: "12px 0",
+                borderBottom: `1px solid ${COLORS.lineFaint}`,
+              }}
+            >
+              All Projects
+            </Link>
+            <a
+              href="#contact"
+              onClick={() => setMenuOpen(false)}
+              className="btn-primary text-sm"
+              style={{
+                textDecoration: "none",
+                textAlign: "center",
+                padding: "12px 0",
+                marginTop: 16,
+              }}
+            >
+              Hire Me
+            </a>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.nav>
   );
 }
@@ -215,38 +318,8 @@ function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center overflow-hidden dot-grid"
+      className="relative min-h-screen flex items-center overflow-hidden"
     >
-      {/* Background gradients */}
-      <div
-        style={{
-          position: "absolute",
-          top: "-20%",
-          right: "-10%",
-          width: 600,
-          height: 600,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 65%)",
-          filter: "blur(60px)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: "5%",
-          left: "-5%",
-          width: 400,
-          height: 400,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 65%)",
-          filter: "blur(50px)",
-          pointerEvents: "none",
-        }}
-      />
-
       <div className="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-16 grid md:grid-cols-2 gap-16 items-center pt-24 pb-20">
         {/* Text */}
         <div>
@@ -255,8 +328,16 @@ function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <p className="section-tag mb-6">
-              ◈ &nbsp;Available for work
+            <p
+              className="mono mb-6"
+              style={{
+                fontSize: 12,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: COLORS.trace,
+              }}
+            >
+              Wassim Jebali · Full-Stack Developer
             </p>
           </motion.div>
 
@@ -264,70 +345,54 @@ function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
+            className="display"
             style={{
-              fontFamily: "'Sora', sans-serif",
-              fontWeight: 800,
-              fontSize: "clamp(2.8rem, 6vw, 5.2rem)",
-              lineHeight: 1.05,
-              letterSpacing: "-0.03em",
-              color: "#e8ecf4",
-              marginBottom: "1rem",
+              fontSize: "clamp(2.4rem, 5.2vw, 4.4rem)",
+              lineHeight: 1.04,
+              color: COLORS.print,
+              marginBottom: "1.5rem",
             }}
           >
-            Wassim
+            I build web
             <br />
-            <span className="shimmer-text">Jebali.</span>
+            apps{" "}
+            <span style={{ color: COLORS.redline }}>
+              end to end.
+            </span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.25 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
             style={{
-              fontFamily: "'Sora', sans-serif",
-              fontSize: "clamp(1.1rem, 2vw, 1.5rem)",
-              fontWeight: 300,
-              color: "#64748b",
-              marginBottom: "1.5rem",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            Full-Stack Developer
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.35 }}
-            style={{
-              color: "#94a3b8",
+              color: COLORS.trace,
               fontSize: 16,
               lineHeight: 1.75,
-              maxWidth: 440,
+              maxWidth: 460,
               marginBottom: "2.5rem",
             }}
           >
-            I design and build high-performance web applications — from
-            beautiful, responsive interfaces to robust scalable backends.
-            Turning ideas into digital realities.
+            From responsive React interfaces to PHP and Node.js backends with
+            MySQL behind them — I design, build, and ship the whole system.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            transition={{ duration: 0.8, delay: 0.45 }}
             className="flex flex-wrap gap-4"
           >
             <a
               href="#projects"
-              className="btn-primary px-7 py-3.5 rounded-xl text-[15px] flex items-center gap-2"
+              className="btn-primary px-7 py-3.5 text-[13px] flex items-center gap-2"
               style={{ textDecoration: "none" }}
             >
-              View Work <ArrowUpRight size={16} />
+              View Work <ArrowUpRight size={15} />
             </a>
             <a
               href="#contact"
-              className="btn-ghost px-7 py-3.5 rounded-xl text-[15px]"
+              className="btn-ghost px-7 py-3.5 text-[13px]"
               style={{ textDecoration: "none" }}
             >
               Let&apos;s Talk
@@ -337,27 +402,31 @@ function HeroSection() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
+            transition={{ duration: 1, delay: 0.7 }}
             className="flex items-center gap-2 mt-8"
           >
-            <MapPin size={14} style={{ color: "#6366f1" }} />
+            <MapPin size={13} style={{ color: COLORS.redline }} />
             <span
               className="mono"
-              style={{ fontSize: 12, color: "#4a5568", letterSpacing: "0.05em" }}
+              style={{
+                fontSize: 11,
+                color: COLORS.trace,
+                letterSpacing: "0.12em",
+              }}
             >
-              Tunisia, Africa — UTC+1
+              TUNIS, TN · UTC+1 · OPEN TO WORK
             </span>
           </motion.div>
         </div>
 
-        {/* Orb */}
+        {/* FIG. 01 — system schematic */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
           className="flex justify-center items-center"
         >
-          <CodeTerminal />
+          <BlueprintSchematic />
         </motion.div>
       </div>
 
@@ -368,64 +437,61 @@ function HeroSection() {
       >
         <span
           className="mono"
-          style={{ fontSize: 10, color: "#334155", letterSpacing: "0.15em" }}
+          style={{
+            fontSize: 10,
+            color: COLORS.trace,
+            letterSpacing: "0.2em",
+            opacity: 0.7,
+          }}
         >
           SCROLL
         </span>
         <div className="bounce-anim">
-          <ChevronDown size={18} style={{ color: "#6366f1" }} />
+          <ChevronDown size={18} style={{ color: COLORS.redline }} />
         </div>
       </div>
     </section>
   );
 }
 
+/* ─── Section Header (figure label + plate title) ────────── */
+function SectionHeader({
+  fig,
+  title,
+}: {
+  fig: string;
+  title: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7 }}
+      viewport={{ once: true }}
+      className="mb-20"
+    >
+      <p className="fig-tag mb-4">{fig}</p>
+      <h2
+        className="display"
+        style={{
+          fontSize: "clamp(1.8rem, 3.6vw, 2.8rem)",
+          color: COLORS.print,
+          lineHeight: 1.1,
+        }}
+      >
+        {title}
+      </h2>
+      <div className="dimension-line mt-5 max-w-xs" />
+    </motion.div>
+  );
+}
+
 /* ─── About ──────────────────────────────────────────────── */
 function AboutSection() {
   return (
-    <section
-      id="about"
-      className="relative py-32 overflow-hidden"
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: "20%",
-          left: "-10%",
-          width: 500,
-          height: 500,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 65%)",
-          filter: "blur(60px)",
-          pointerEvents: "none",
-        }}
-      />
-
+    <section id="about" className="relative py-32 overflow-hidden">
       <div className="max-w-7xl mx-auto px-8 md:px-16">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <p className="section-tag mb-4">◈ &nbsp;Who I am</p>
-          <h2
-            style={{
-              fontFamily: "'Sora', sans-serif",
-              fontWeight: 800,
-              fontSize: "clamp(2rem, 4vw, 3.2rem)",
-              color: "#e8ecf4",
-              letterSpacing: "-0.03em",
-              lineHeight: 1.1,
-            }}
-          >
-            About Me
-          </h2>
-          <div className="gradient-line mt-5 max-w-xs" />
-        </motion.div>
+        <SectionHeader fig="FIG. 02 — ENGINEER PROFILE" title="About Me" />
 
         <div className="grid md:grid-cols-5 gap-16 items-start">
           {/* Photo + bio */}
@@ -436,22 +502,11 @@ function AboutSection() {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              {/* Photo */}
+              {/* Photo in a registration-mark frame */}
               <div
-                className="relative mb-8"
+                className="relative mb-10 corner-ticks"
                 style={{ maxWidth: 340 }}
               >
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: -2,
-                    borderRadius: 24,
-                    background:
-                      "linear-gradient(135deg, rgba(99,102,241,0.6), rgba(16,185,129,0.4))",
-                    zIndex: -1,
-                    filter: "blur(1px)",
-                  }}
-                />
                 <ImageWithFallback
                   src={profilePhoto}
                   alt="Wassim Jebali — Full-Stack Developer"
@@ -460,101 +515,74 @@ function AboutSection() {
                     height: 400,
                     objectFit: "cover",
                     objectPosition: "center center",
-                    borderRadius: 22,
+                    border: `1px solid ${COLORS.line}`,
                     display: "block",
+                    filter: "saturate(0.9)",
                   }}
                 />
-                {/* Badge */}
                 <div
-                  className="glass absolute -bottom-4 -right-4 px-4 py-2 rounded-xl flex items-center gap-2"
+                  className="stamp"
+                  style={{ position: "absolute", bottom: -16, right: -8 }}
                 >
-                  <div
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      background: "#10b981",
-                      boxShadow: "0 0 8px #10b981",
-                    }}
-                  />
-                  <span style={{ fontSize: 12, color: "#94a3b8" }}>
-                    Open to opportunities
-                  </span>
+                  Open to Work
                 </div>
               </div>
 
               {/* Bio */}
               <p
                 style={{
-                  color: "#94a3b8",
+                  color: COLORS.trace,
                   fontSize: 15,
                   lineHeight: 1.85,
                   marginBottom: "1.5rem",
                 }}
               >
-                I&apos;m a passionate full-stack developer from Tunisia with 3+
-                years of experience building web and mobile applications. I
-                thrive on creating seamless digital experiences that blend
-                clean architecture with beautiful design.
+                I&apos;m a full-stack developer from Tunisia with 3+ years of
+                experience building web and mobile applications. I care about
+                the whole drawing — clean architecture on the back, precise
+                interfaces on the front.
               </p>
               <p
                 style={{
-                  color: "#64748b",
+                  color: COLORS.trace,
+                  opacity: 0.8,
                   fontSize: 14,
                   lineHeight: 1.85,
                 }}
               >
                 When I&apos;m not coding, you&apos;ll find me exploring new
-                technologies, contributing to open source, or sharing
-                knowledge with the developer community.
+                technologies, contributing to open source, or sharing knowledge
+                with the developer community.
               </p>
             </motion.div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4 mt-10">
-              {stats.map((s, i) => (
-                <motion.div
-                  key={s.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.08 }}
-                  viewport={{ once: true }}
-                  className="glass rounded-2xl p-4"
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Sora', sans-serif",
-                      fontWeight: 800,
-                      fontSize: "1.8rem",
-                      background: "linear-gradient(135deg, #6366f1, #34d399)",
-                      WebkitBackgroundClip: "text",
-                      backgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      lineHeight: 1.1,
-                    }}
-                  >
-                    {s.value}
-                  </div>
-                  <div
-                    style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}
-                  >
-                    {s.label}
-                  </div>
-                </motion.div>
+            {/* Spec sheet */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="title-block grid grid-cols-2 mt-10"
+            >
+              {specs.map((s) => (
+                <div key={s.label} className="tb-cell">
+                  <span className="tb-label">{s.label}</span>
+                  <span className="tb-value">{s.value}</span>
+                </div>
               ))}
-            </div>
+            </motion.div>
           </div>
 
-          {/* Tech stack */}
+          {/* Tech stack — bill of materials */}
           <div className="md:col-span-3">
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="section-tag mb-6"
+              className="fig-tag mb-6"
             >
-              ◈ &nbsp;Tech Stack
+              Tech Stack — Bill of Materials
             </motion.p>
             <div className="grid sm:grid-cols-2 gap-4">
               {techCategories.map((cat, i) => {
@@ -566,33 +594,44 @@ function AboutSection() {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: i * 0.07 }}
                     viewport={{ once: true }}
-                    className="glass tech-hover rounded-2xl p-5 cursor-default"
+                    className="sheet tech-hover p-5 cursor-default"
                   >
-                    <div className="flex items-center gap-3 mb-4">
-                      <div
-                        style={{
-                          width: 38,
-                          height: 38,
-                          borderRadius: 10,
-                          background: `${cat.color}18`,
-                          border: `1px solid ${cat.color}30`,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Icon size={18} style={{ color: cat.color }} />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          style={{
+                            width: 36,
+                            height: 36,
+                            border: `1px solid ${COLORS.line}`,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Icon size={16} style={{ color: COLORS.trace }} />
+                        </div>
+                        <span
+                          className="display"
+                          style={{
+                            fontWeight: 700,
+                            fontSize: 13,
+                            letterSpacing: "0.06em",
+                            color: COLORS.print,
+                          }}
+                        >
+                          {cat.name}
+                        </span>
                       </div>
                       <span
+                        className="mono"
                         style={{
-                          fontFamily: "'Sora', sans-serif",
-                          fontWeight: 600,
-                          fontSize: 14,
-                          color: "#e8ecf4",
+                          fontSize: 9,
+                          letterSpacing: "0.14em",
+                          color: COLORS.redline,
                         }}
                       >
-                        {cat.name}
+                        {cat.ref}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -602,10 +641,8 @@ function AboutSection() {
                           className="mono"
                           style={{
                             fontSize: 11,
-                            color: cat.color,
-                            background: `${cat.color}12`,
-                            border: `1px solid ${cat.color}20`,
-                            borderRadius: 6,
+                            color: COLORS.trace,
+                            border: `1px solid ${COLORS.lineFaint}`,
                             padding: "3px 8px",
                           }}
                         >
@@ -621,286 +658,6 @@ function AboutSection() {
         </div>
       </div>
     </section>
-  );
-}
-
-/* ─── Project Card ───────────────────────────────────────── */
-function ProjectCard({
-  project,
-  index,
-  onWatchDemo,
-}: {
-  project: Project;
-  index: number;
-  onWatchDemo: (src: string, title: string, color?: string) => void;
-}) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [hasDbVideo, setHasDbVideo] = useState(false);
-  const [dbVideoUrl, setDbVideoUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    const checkVideo = async () => {
-      try {
-        const { getVideo } = await import("@/utils/videoDb");
-        const blob = await getVideo(project.id);
-        if (blob && active) {
-          setHasDbVideo(true);
-          const url = URL.createObjectURL(blob);
-          setDbVideoUrl(url);
-        }
-      } catch (e) {
-        console.error("IndexedDB error", e);
-      }
-    };
-    checkVideo();
-    return () => {
-      active = false;
-      if (dbVideoUrl) {
-        URL.revokeObjectURL(dbVideoUrl);
-      }
-    };
-  }, [project.id]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = cardRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const cx = rect.width / 2;
-    const cy = rect.height / 2;
-    const rotX = ((y - cy) / cy) * -9;
-    const rotY = ((x - cx) / cx) * 9;
-    el.style.setProperty("--mx", `${(x / rect.width) * 100}%`);
-    el.style.setProperty("--my", `${(y / rect.height) * 100}%`);
-    el.style.transform = `perspective(1200px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.025)`;
-  };
-
-  const handleMouseLeave = () => {
-    if (cardRef.current) {
-      cardRef.current.style.transform =
-        "perspective(1200px) rotateX(0deg) rotateY(0deg) scale(1)";
-    }
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay: index * 0.12 }}
-      viewport={{ once: true }}
-    >
-      <div
-        ref={cardRef}
-        className="tilt-card glass rounded-2xl overflow-hidden cursor-pointer relative"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
-        <div className="card-shine" />
-
-        {/* Top color bar */}
-        <div
-          style={{
-            height: 3,
-            background: `linear-gradient(90deg, ${project.color}, ${project.color}44)`,
-          }}
-        />
-
-        {project.image && (
-          <div className="w-full h-48 overflow-hidden relative border-b border-border">
-            <img
-              src={project.image}
-              alt={project.title}
-              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-            />
-          </div>
-        )}
-
-        <div className="p-7">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span
-                  className="mono"
-                  style={{
-                    fontSize: 10,
-                    color: project.color,
-                    letterSpacing: "0.12em",
-                  }}
-                >
-                  {project.year}
-                </span>
-              </div>
-              <Link to={`/project/${project.id}`} style={{ textDecoration: "none" }}>
-                <h3
-                  style={{
-                    fontFamily: "'Sora', sans-serif",
-                    fontWeight: 700,
-                    fontSize: "1.2rem",
-                    color: "#e8ecf4",
-                    letterSpacing: "-0.02em",
-                    cursor: "pointer",
-                    transition: "color 0.25s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = project.color;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = "#e8ecf4";
-                  }}
-                >
-                  {project.title}
-                </h3>
-              </Link>
-              <p
-                style={{
-                  fontSize: 12,
-                  color: project.color,
-                  marginTop: 2,
-                }}
-              >
-                {project.tagline}
-              </p>
-            </div>
-
-            <div className="flex gap-2 mt-1" onClick={(e) => e.stopPropagation()}>
-              {project.githubUrl && (
-                <a
-                  href={project.githubUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 34,
-                    height: 34,
-                    borderRadius: 10,
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "#64748b",
-                    transition: "color 0.25s, background 0.25s",
-                    textDecoration: "none",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = "#e8ecf4";
-                    (e.currentTarget as HTMLAnchorElement).style.background =
-                      "rgba(255,255,255,0.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLAnchorElement).style.color = "#64748b";
-                    (e.currentTarget as HTMLAnchorElement).style.background =
-                      "rgba(255,255,255,0.04)";
-                  }}
-                  title="View Source Code"
-                >
-                  <Github size={15} />
-                </a>
-              )}
-
-              {(project.videoUrl || hasDbVideo) && (
-                <button
-                  onClick={() => onWatchDemo(dbVideoUrl || project.videoUrl!, project.title, project.color)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 34,
-                    height: 34,
-                    borderRadius: 10,
-                    background: `${project.color}15`,
-                    border: `1px solid ${project.color}30`,
-                    color: project.color,
-                    cursor: "pointer",
-                    transition: "background 0.25s, box-shadow 0.25s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = `${project.color}28`;
-                    e.currentTarget.style.boxShadow = `0 0 16px ${project.color}30`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = `${project.color}15`;
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                  title="Watch Demo Video"
-                >
-                  <Play size={15} fill="currentColor" />
-                </button>
-              )}
-
-              {project.runUrl && (() => {
-                const isInternal = project.runUrl.startsWith("/");
-                const btnStyle = {
-                  display: "flex" as const,
-                  alignItems: "center" as const,
-                  justifyContent: "center" as const,
-                  width: 34,
-                  height: 34,
-                  borderRadius: 10,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "#64748b",
-                  transition: "color 0.25s, background 0.25s",
-                  textDecoration: "none" as const,
-                };
-                const hoverEnter = (e: any) => {
-                  e.currentTarget.style.color = "#e8ecf4";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                };
-                const hoverLeave = (e: any) => {
-                  e.currentTarget.style.color = "#64748b";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                };
-                return isInternal ? (
-                  <Link to={project.runUrl} style={btnStyle} onMouseEnter={hoverEnter} onMouseLeave={hoverLeave} title="Live Demo">
-                    <ExternalLink size={15} />
-                  </Link>
-                ) : (
-                  <a href={project.runUrl} target="_blank" rel="noreferrer" style={btnStyle} onMouseEnter={hoverEnter} onMouseLeave={hoverLeave} title="Live Demo">
-                    <ExternalLink size={15} />
-                  </a>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* Description */}
-          <p
-            style={{
-              color: "#64748b",
-              fontSize: 14,
-              lineHeight: 1.75,
-              marginBottom: "1.5rem",
-            }}
-          >
-            {project.description}
-          </p>
-
-          {/* Stack */}
-          <div className="flex flex-wrap gap-2">
-            {project.tags.map((t) => (
-              <span
-                key={t}
-                className="mono"
-                style={{
-                  fontSize: 10,
-                  color: "#94a3b8",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  borderRadius: 6,
-                  padding: "3px 8px",
-                  letterSpacing: "0.03em",
-                }}
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </motion.div>
   );
 }
 
@@ -920,21 +677,6 @@ function ProjectsSection({
 
   return (
     <section id="projects" className="relative py-32 overflow-hidden">
-      <div
-        style={{
-          position: "absolute",
-          top: "10%",
-          right: "-10%",
-          width: 600,
-          height: 600,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 65%)",
-          filter: "blur(70px)",
-          pointerEvents: "none",
-        }}
-      />
-
       <div className="max-w-7xl mx-auto px-8 md:px-16">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -943,40 +685,52 @@ function ProjectsSection({
           viewport={{ once: true }}
           className="mb-20"
         >
-          <p className="section-tag mb-4">◈ &nbsp;Selected work</p>
+          <p className="fig-tag mb-4">FIG. 03 — SELECTED WORK</p>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <h2
+                className="display"
                 style={{
-                  fontFamily: "'Sora', sans-serif",
-                  fontWeight: 800,
-                  fontSize: "clamp(2rem, 4vw, 3.2rem)",
-                  color: "#e8ecf4",
-                  letterSpacing: "-0.03em",
+                  fontSize: "clamp(1.8rem, 3.6vw, 2.8rem)",
+                  color: COLORS.print,
                   lineHeight: 1.1,
                 }}
               >
                 Projects
               </h2>
-              <div className="gradient-line mt-5 max-w-xs" />
+              <div className="dimension-line mt-5 max-w-xs" />
             </div>
             <p
-              style={{ color: "#64748b", fontSize: 14, maxWidth: 280, lineHeight: 1.7 }}
+              style={{
+                color: COLORS.trace,
+                fontSize: 14,
+                maxWidth: 280,
+                lineHeight: 1.7,
+              }}
             >
-              A collection of products and experiments built with modern
-              web technologies.
+              Products and experiments, drawn front to back with modern web
+              technologies.
             </p>
           </div>
         </motion.div>
 
         {featuredProjects.length === 0 ? (
-          <div className="glass rounded-2xl p-12 text-center text-muted-foreground">
-            No featured projects yet. Check out the project zone or add some in the admin panel!
+          <div
+            className="sheet p-12 text-center"
+            style={{ color: COLORS.trace }}
+          >
+            No featured projects yet. Check out the project index or add some
+            in the admin panel!
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
             {featuredProjects.map((p, i) => (
-              <ProjectCard key={p.id} project={p} index={i} onWatchDemo={onWatchDemo} />
+              <ProjectCard
+                key={p.id}
+                project={p}
+                index={i}
+                onWatchDemo={onWatchDemo}
+              />
             ))}
           </div>
         )}
@@ -984,10 +738,10 @@ function ProjectsSection({
         <div className="mt-12 text-center">
           <Link
             to="/projects"
-            className="btn-ghost px-8 py-3 rounded-xl text-[15px] inline-flex items-center gap-2"
+            className="btn-ghost px-8 py-3 text-[13px] inline-flex items-center gap-2"
             style={{ textDecoration: "none" }}
           >
-            Explore Project Zone <ArrowUpRight size={16} />
+            Open Project Index <ArrowUpRight size={15} />
           </Link>
         </div>
       </div>
@@ -996,66 +750,49 @@ function ProjectsSection({
 }
 
 /* ─── Contact ────────────────────────────────────────────── */
+const CONTACT_EMAIL = "wassimjebali583@gmail.com";
+
 function ContactSection() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
+  const [status, setStatus] = useState<"idle" | "sent">("idle");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
+  // No backend: compose the message in the visitor's email app instead.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus("sending");
-    setTimeout(() => {
-      setStatus("sent");
-      setForm({ name: "", email: "", message: "" });
-      setTimeout(() => setStatus("idle"), 3500);
-    }, 1800);
+    const subject = `Portfolio contact from ${form.name}`;
+    const body = `Hi Wassim,\n\n${form.message}\n\n— ${form.name} (${form.email})`;
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+    setStatus("sent");
+    setTimeout(() => setStatus("idle"), 4000);
   };
+
+  const fieldLabel = (text: string) => (
+    <label
+      className="mono"
+      style={{
+        fontSize: 10,
+        color: COLORS.trace,
+        letterSpacing: "0.16em",
+        textTransform: "uppercase",
+      }}
+    >
+      {text}
+    </label>
+  );
 
   return (
     <section id="contact" className="relative py-32 overflow-hidden">
-      <div
-        style={{
-          position: "absolute",
-          bottom: "0%",
-          left: "20%",
-          width: 600,
-          height: 400,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 65%)",
-          filter: "blur(70px)",
-          pointerEvents: "none",
-        }}
-      />
-
       <div className="max-w-7xl mx-auto px-8 md:px-16">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <p className="section-tag mb-4">◈ &nbsp;Get in touch</p>
-          <h2
-            style={{
-              fontFamily: "'Sora', sans-serif",
-              fontWeight: 800,
-              fontSize: "clamp(2rem, 4vw, 3.2rem)",
-              color: "#e8ecf4",
-              letterSpacing: "-0.03em",
-              lineHeight: 1.1,
-            }}
-          >
-            Let&apos;s Build
-            <br />
-            <span className="shimmer-text">Something Together.</span>
-          </h2>
-          <div className="gradient-line mt-5 max-w-xs" />
-        </motion.div>
+        <SectionHeader
+          fig="FIG. 04 — CHANGE REQUEST"
+          title="Let's Build Something."
+        />
 
         <div className="grid md:grid-cols-5 gap-16">
           {/* Left info */}
@@ -1068,13 +805,13 @@ function ContactSection() {
           >
             <p
               style={{
-                color: "#94a3b8",
+                color: COLORS.trace,
                 fontSize: 16,
                 lineHeight: 1.8,
               }}
             >
-              Have a project in mind, a collaboration opportunity, or just
-              want to say hello? I&apos;d love to hear from you.
+              Have a project in mind, a collaboration opportunity, or just want
+              to say hello? I&apos;d love to hear from you.
             </p>
 
             <div className="flex flex-col gap-5">
@@ -1082,26 +819,26 @@ function ContactSection() {
                 {
                   icon: Mail,
                   label: "Email",
-                  value: "wassimjebali583@gmail.com",
-                  color: "#6366f1",
+                  value: CONTACT_EMAIL,
+                  href: `mailto:${CONTACT_EMAIL}`,
                 },
                 {
                   icon: Github,
                   label: "GitHub",
                   value: "github.com/Sextty",
-                  color: "#8b5cf6",
+                  href: "https://github.com/Sextty",
                 },
                 {
                   icon: ExternalLink,
                   label: "LinkedIn",
                   value: "linkedin.com/in/wassim-wess-b3a544380",
-                  color: "#0a66c2",
+                  href: "https://linkedin.com/in/wassim-wess-b3a544380",
                 },
                 {
                   icon: MapPin,
                   label: "Location",
-                  value: "Tunisia, Africa",
-                  color: "#10b981",
+                  value: "Tunis, Tunisia",
+                  href: undefined,
                 },
               ].map((item) => {
                 const Icon = item.icon;
@@ -1111,66 +848,100 @@ function ContactSection() {
                       style={{
                         width: 42,
                         height: 42,
-                        borderRadius: 12,
-                        background: `${item.color}12`,
-                        border: `1px solid ${item.color}25`,
+                        border: `1px solid ${COLORS.line}`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         flexShrink: 0,
                       }}
                     >
-                      <Icon size={16} style={{ color: item.color }} />
+                      <Icon size={15} style={{ color: COLORS.trace }} />
                     </div>
                     <div>
                       <div
-                        style={{ fontSize: 11, color: "#4a5568", marginBottom: 2 }}
                         className="mono"
+                        style={{
+                          fontSize: 10,
+                          letterSpacing: "0.16em",
+                          color: COLORS.trace,
+                          opacity: 0.75,
+                          marginBottom: 2,
+                        }}
                       >
                         {item.label.toUpperCase()}
                       </div>
-                      <div style={{ fontSize: 14, color: "#94a3b8" }}>
-                        {item.value}
-                      </div>
+                      {item.href ? (
+                        <a
+                          href={item.href}
+                          target={
+                            item.href.startsWith("http") ? "_blank" : undefined
+                          }
+                          rel="noreferrer"
+                          style={{
+                            fontSize: 14,
+                            color: COLORS.print,
+                            textDecoration: "none",
+                            transition: "color 0.2s",
+                          }}
+                          onMouseEnter={(e) =>
+                            ((e.target as HTMLAnchorElement).style.color =
+                              COLORS.redline)
+                          }
+                          onMouseLeave={(e) =>
+                            ((e.target as HTMLAnchorElement).style.color =
+                              COLORS.print)
+                          }
+                        >
+                          {item.value}
+                        </a>
+                      ) : (
+                        <div style={{ fontSize: 14, color: COLORS.print }}>
+                          {item.value}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Availability badge */}
-            <div
-              className="glass-em rounded-2xl p-5 mt-2"
-            >
+            {/* Availability */}
+            <div className="sheet p-5 mt-2">
               <div className="flex items-center gap-3 mb-2">
                 <div
                   style={{
                     width: 8,
                     height: 8,
-                    borderRadius: "50%",
-                    background: "#10b981",
-                    boxShadow: "0 0 10px #10b981",
+                    background: COLORS.redline,
                   }}
                 />
                 <span
+                  className="mono"
                   style={{
-                    fontFamily: "'Sora', sans-serif",
+                    fontSize: 12,
                     fontWeight: 600,
-                    fontSize: 14,
-                    color: "#e8ecf4",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                    color: COLORS.print,
                   }}
                 >
-                  Currently Available
+                  Status: Accepting Work
                 </span>
               </div>
-              <p style={{ fontSize: 13, color: "#64748b", lineHeight: 1.7 }}>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: COLORS.trace,
+                  lineHeight: 1.7,
+                }}
+              >
                 Open to full-time roles and freelance projects. Response time
                 typically within 24 hours.
               </p>
             </div>
           </motion.div>
 
-          {/* Form */}
+          {/* Change request form */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -1178,143 +949,121 @@ function ContactSection() {
             viewport={{ once: true }}
             className="md:col-span-3"
           >
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <div className="grid sm:grid-cols-2 gap-5">
-                <div className="flex flex-col gap-2">
-                  <label
-                    className="mono"
-                    style={{ fontSize: 11, color: "#6366f1", letterSpacing: "0.12em" }}
-                  >
-                    YOUR NAME
-                  </label>
-                  <input
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                    required
-                    className="glow-input"
-                    style={{
-                      borderRadius: 12,
-                      padding: "14px 18px",
-                      fontSize: 15,
-                      width: "100%",
-                    }}
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label
-                    className="mono"
-                    style={{ fontSize: 11, color: "#6366f1", letterSpacing: "0.12em" }}
-                  >
-                    EMAIL ADDRESS
-                  </label>
-                  <input
-                    name="email"
-                    type="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="hello@example.com"
-                    required
-                    className="glow-input glow-input-em"
-                    style={{
-                      borderRadius: 12,
-                      padding: "14px 18px",
-                      fontSize: 15,
-                      width: "100%",
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label
-                  className="mono"
-                  style={{ fontSize: 11, color: "#6366f1", letterSpacing: "0.12em" }}
-                >
-                  MESSAGE
-                </label>
-                <textarea
-                  name="message"
-                  value={form.message}
-                  onChange={handleChange}
-                  placeholder="Tell me about your project, idea, or just say hi..."
-                  required
-                  rows={6}
-                  className="glow-input"
-                  style={{
-                    borderRadius: 12,
-                    padding: "14px 18px",
-                    fontSize: 15,
-                    width: "100%",
-                    resize: "vertical",
-                    fontFamily: "'DM Sans', sans-serif",
-                    lineHeight: 1.7,
-                  }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={status !== "idle"}
-                className="btn-primary flex items-center justify-center gap-3 py-4 rounded-xl text-[15px]"
+            <div className="sheet corner-ticks p-6 md:p-8">
+              <div
+                className="mono flex items-center justify-between pb-4 mb-6"
                 style={{
-                  opacity: status !== "idle" ? 0.75 : 1,
-                  cursor: status !== "idle" ? "not-allowed" : "pointer",
+                  fontSize: 10,
+                  letterSpacing: "0.16em",
+                  color: COLORS.trace,
+                  borderBottom: `1px solid ${COLORS.lineFaint}`,
                 }}
               >
-                {status === "idle" && (
-                  <>
-                    Send Message <Send size={16} />
-                  </>
-                )}
-                {status === "sending" && (
-                  <>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      style={{ animation: "ring-a 0.8s linear infinite" }}
-                    >
-                      <circle
-                        cx="8"
-                        cy="8"
-                        r="6"
-                        stroke="rgba(255,255,255,0.3)"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M8 2 A6 6 0 0 1 14 8"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    Sending...
-                  </>
-                )}
-                {status === "sent" && (
-                  <>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                    >
-                      <path
-                        d="M3 8 L6.5 11.5 L13 5"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    Message Sent!
-                  </>
-                )}
-              </button>
-            </form>
+                <span>CHANGE REQUEST — FORM CR-01</span>
+                <span style={{ color: COLORS.redline }}>PRIORITY: HIGH</span>
+              </div>
+
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <div className="flex flex-col gap-2">
+                    {fieldLabel("Field 01 — Name")}
+                    <input
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                      required
+                      className="glow-input"
+                      style={{
+                        padding: "14px 18px",
+                        fontSize: 15,
+                        width: "100%",
+                      }}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {fieldLabel("Field 02 — Email")}
+                    <input
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="hello@example.com"
+                      required
+                      className="glow-input"
+                      style={{
+                        padding: "14px 18px",
+                        fontSize: 15,
+                        width: "100%",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  {fieldLabel("Field 03 — Message")}
+                  <textarea
+                    name="message"
+                    value={form.message}
+                    onChange={handleChange}
+                    placeholder="Tell me about your project, idea, or just say hi..."
+                    required
+                    rows={6}
+                    className="glow-input"
+                    style={{
+                      padding: "14px 18px",
+                      fontSize: 15,
+                      width: "100%",
+                      resize: "vertical",
+                      fontFamily: FONTS.body,
+                      lineHeight: 1.7,
+                    }}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={status !== "idle"}
+                  className="btn-primary flex items-center justify-center gap-3 py-4 text-[13px]"
+                  style={{
+                    opacity: status !== "idle" ? 0.75 : 1,
+                    cursor: status !== "idle" ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {status === "idle" && (
+                    <>
+                      Send Message <Send size={15} />
+                    </>
+                  )}
+                  {status === "sent" && (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path
+                          d="M3 8 L6.5 11.5 L13 5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      Opening Your Email App…
+                    </>
+                  )}
+                </button>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: COLORS.trace,
+                    opacity: 0.8,
+                    textAlign: "center",
+                    marginTop: 4,
+                  }}
+                >
+                  This opens your email app with the message pre-filled — just
+                  hit send.
+                </p>
+              </form>
+            </div>
           </motion.div>
         </div>
       </div>
@@ -1322,100 +1071,102 @@ function ContactSection() {
   );
 }
 
-/* ─── Footer ─────────────────────────────────────────────── */
+/* ─── Footer (drawing title block) ───────────────────────── */
 function Footer() {
   return (
-    <footer
-      style={{
-        borderTop: "1px solid rgba(99,102,241,0.1)",
-        padding: "40px 0",
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-8 md:px-16 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-3">
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 9,
-              background: "linear-gradient(135deg, #6366f1, #10b981)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "'Sora', sans-serif",
-                fontWeight: 800,
-                fontSize: 13,
-                color: "white",
-              }}
-            >
-              WJ
-            </span>
-          </div>
-          <span style={{ fontSize: 13, color: "#4a5568" }}>
-            © 2026 Wassim Jebali. All rights reserved.
-          </span>
+    <footer style={{ padding: "48px 0 40px" }}>
+      <div className="max-w-7xl mx-auto px-8 md:px-16">
+        {/* Title block */}
+        <div className="title-block grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6">
+          {[
+            { label: "Drawn by", value: "W. JEBALI" },
+            { label: "Project", value: "PORTFOLIO" },
+            { label: "Sheet", value: "1 OF 1" },
+            { label: "Rev", value: "C" },
+            { label: "Scale", value: "1:1" },
+            { label: "Date", value: "2026" },
+          ].map((cell) => (
+            <div key={cell.label} className="tb-cell">
+              <span className="tb-label">{cell.label}</span>
+              <span className="tb-value">{cell.value}</span>
+            </div>
+          ))}
         </div>
 
-        <div className="flex items-center gap-6">
-          {["About", "Projects", "Contact"].map((l) => (
-            <a
-              key={l}
-              href={`#${l.toLowerCase()}`}
+        {/* Links row */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mt-8">
+          <span
+            className="mono"
+            style={{ fontSize: 11, color: COLORS.trace, letterSpacing: "0.08em" }}
+          >
+            © 2026 WASSIM JEBALI. ALL RIGHTS RESERVED.
+          </span>
+
+          <div className="flex items-center gap-6">
+            {["About", "Projects", "Contact"].map((l) => (
+              <a
+                key={l}
+                href={`#${l.toLowerCase()}`}
+                className="mono"
+                style={{
+                  fontSize: 11,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: COLORS.trace,
+                  textDecoration: "none",
+                  transition: "color 0.2s",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.target as HTMLAnchorElement).style.color = COLORS.print)
+                }
+                onMouseLeave={(e) =>
+                  ((e.target as HTMLAnchorElement).style.color = COLORS.trace)
+                }
+              >
+                {l}
+              </a>
+            ))}
+            <Link
+              to="/admin"
+              className="mono"
               style={{
-                fontSize: 13,
-                color: "#4a5568",
+                fontSize: 11,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: COLORS.trace,
                 textDecoration: "none",
                 transition: "color 0.2s",
               }}
               onMouseEnter={(e) =>
-                ((e.target as HTMLAnchorElement).style.color = "#94a3b8")
+                ((e.target as HTMLAnchorElement).style.color = COLORS.redline)
               }
               onMouseLeave={(e) =>
-                ((e.target as HTMLAnchorElement).style.color = "#4a5568")
+                ((e.target as HTMLAnchorElement).style.color = COLORS.trace)
               }
             >
-              {l}
-            </a>
-          ))}
-          <Link
-            to="/admin"
-            style={{
-              fontSize: 13,
-              color: "#4a5568",
-              textDecoration: "none",
-              transition: "color 0.2s",
-            }}
-            onMouseEnter={(e) =>
-              ((e.target as HTMLAnchorElement).style.color = "#6366f1")
-            }
-            onMouseLeave={(e) =>
-              ((e.target as HTMLAnchorElement).style.color = "#4a5568")
-            }
-          >
-            Admin Portal
-          </Link>
-        </div>
+              Admin Portal
+            </Link>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <div
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: "#10b981",
-              boxShadow: "0 0 8px #10b981",
-            }}
-          />
-          <span
-            className="mono"
-            style={{ fontSize: 11, color: "#4a5568", letterSpacing: "0.1em" }}
-          >
-            ALL SYSTEMS OPERATIONAL
-          </span>
+          <div className="flex items-center gap-2">
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                background: COLORS.redline,
+              }}
+            />
+            <span
+              className="mono"
+              style={{
+                fontSize: 10,
+                color: COLORS.trace,
+                letterSpacing: "0.12em",
+              }}
+            >
+              ALL SYSTEMS OPERATIONAL
+            </span>
+          </div>
         </div>
       </div>
     </footer>
@@ -1426,7 +1177,11 @@ function Footer() {
 export default function PublicPortfolio() {
   const [scrolled, setScrolled] = useState(false);
   const activeSection = useActiveSection(["about", "projects", "contact"]);
-  const [playingVideo, setPlayingVideo] = useState<{ src: string; title: string; color?: string } | null>(null);
+  const [playingVideo, setPlayingVideo] = useState<{
+    src: string;
+    title: string;
+    color?: string;
+  } | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -1436,8 +1191,14 @@ export default function PublicPortfolio() {
 
   return (
     <div
-      style={{ background: "#060912", color: "#e8ecf4", overflowX: "hidden" }}
+      className="sheet-grid"
+      style={{
+        background: COLORS.ground,
+        color: COLORS.print,
+        overflowX: "hidden",
+      }}
     >
+      <div className="drawing-frame hidden md:block" />
       <ScrollProgress />
       <Navbar scrolled={scrolled} activeSection={activeSection} />
       <main>
@@ -1448,7 +1209,11 @@ export default function PublicPortfolio() {
         </SectionEntrance>
         <SectionDivider />
         <SectionEntrance delay={0.1}>
-          <ProjectsSection onWatchDemo={(src, title, color) => setPlayingVideo({ src, title, color })} />
+          <ProjectsSection
+            onWatchDemo={(src, title, color) =>
+              setPlayingVideo({ src, title, color })
+            }
+          />
         </SectionEntrance>
         <SectionDivider />
         <SectionEntrance delay={0.2}>
