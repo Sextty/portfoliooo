@@ -243,6 +243,10 @@ export default function SnapNoteDemo() {
                 placeholder="tags, comma, separated"
                 style={{ width: "100%", boxSizing: "border-box", margin: "12px 0", background: "transparent", border: "none", borderBottom: "1px solid #262b38", color: "#14b8a6", padding: "6px 0", outline: "none", fontSize: 13 }}
               />
+              <div style={{ color: "#8b93a7", fontSize: 12, marginBottom: 8 }}>
+                {selected.content.trim() ? selected.content.trim().split(/\s+/).length : 0} words ·{" "}
+                {selected.content.length} chars
+              </div>
               {preview ? (
                 <Markdown src={selected.content} />
               ) : (

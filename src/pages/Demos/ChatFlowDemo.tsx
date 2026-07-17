@@ -173,7 +173,37 @@ export default function ChatFlowDemo() {
               # {r}
             </button>
           ))}
-          <div style={{ fontSize: 12, color: "#9aa0bd", marginTop: 20 }}>
+          <div style={{ textTransform: "uppercase", fontSize: 12, letterSpacing: "0.08em", color: "#9aa0bd", margin: "18px 0 8px" }}>
+            Online — {BOTS.length + 1}
+          </div>
+          {[user, ...BOTS].map((u) => (
+            <div key={u} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, padding: "3px 2px" }}>
+              <span
+                style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: "50%",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 8,
+                  fontWeight: 700,
+                  background: "linear-gradient(135deg, #8b5cf6, #06b6d4)",
+                  color: "white",
+                }}
+              >
+                {u.slice(0, 2).toUpperCase()}
+              </span>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e" }} />
+              {u}
+              {u === user && (
+                <span style={{ marginLeft: "auto", fontSize: 10, color: "#9aa0bd", border: "1px solid #262a42", borderRadius: 999, padding: "1px 7px" }}>
+                  you
+                </span>
+              )}
+            </div>
+          ))}
+          <div style={{ fontSize: 12, color: "#9aa0bd", marginTop: 14 }}>
             Signed in as <b>{user}</b>
           </div>
         </aside>

@@ -8,6 +8,7 @@ interface VaultFile {
   mimeType: string;
   owner: string;
   url?: string; // object URL for real uploads (downloadable)
+  version?: number;
   ts: number;
 }
 interface Activity {
@@ -76,16 +77,28 @@ export default function CloudVaultDemo() {
     Array.from(list).forEach((file) => {
       const url = URL.createObjectURL(file);
       urls.current.push(url);
-      const f: VaultFile = {
-        id: Math.random().toString(36).slice(2, 9),
-        name: file.name,
-        size: file.size,
-        mimeType: file.type || "application/octet-stream",
-        owner: "you",
-        url,
-        ts: Date.now(),
-      };
-      setFiles((prev) => [f, ...prev]);
+      setFiles((prev) => {
+        // Same rule as the real app: re-uploading a filename bumps its version.
+        const existing = prev.find((x) => x.name === file.name);
+        if (existing) {
+          return prev.map((x) =>
+            x.id === existing.id
+              ? { ...x, size: file.size, mimeType: file.type || x.mimeType, url, version: (x.version || 1) + 1, ts: Date.now() }
+              : x,
+          );
+        }
+        const f: VaultFile = {
+          id: Math.random().toString(36).slice(2, 9),
+          name: file.name,
+          size: file.size,
+          mimeType: file.type || "application/octet-stream",
+          owner: "you",
+          url,
+          version: 1,
+          ts: Date.now(),
+        };
+        return [f, ...prev];
+      });
       setActivity((a) => [{ type: "created" as const, name: file.name, by: "you", ts: Date.now() }, ...a].slice(0, 25));
     });
   };
@@ -146,7 +159,7 @@ export default function CloudVaultDemo() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
                     <div style={{ color: "#8a97a6", fontSize: 12 }}>
-                      {humanSize(f.size)} · v1 · {f.owner}
+                      {humanSize(f.size)} · v{f.version || 1} · {f.owner}
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>

@@ -39,7 +39,7 @@ const seed: Poll[] = [
 
 export default function PollWaveDemo() {
   const [polls, setPolls] = useState<Poll[]>(seed);
-  const [voted, setVoted] = useState<Set<number>>(new Set());
+  const [voted, setVoted] = useState<Record<number, number>>({});
   const [creating, setCreating] = useState(false);
   const [question, setQuestion] = useState("");
   const [opts, setOpts] = useState(["", ""]);
@@ -63,7 +63,8 @@ export default function PollWaveDemo() {
   }, []);
 
   const vote = (pollId: number, optionId: number) => {
-    setVoted((s) => new Set(s).add(pollId));
+    if (voted[pollId] != null) return; // one vote per poll — same rule as the real app
+    setVoted((s) => ({ ...s, [pollId]: optionId }));
     setPolls((prev) =>
       prev.map((p) =>
         p.id === pollId
@@ -151,26 +152,29 @@ export default function PollWaveDemo() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {polls.map((p) => {
             const total = p.options.reduce((s, o) => s + o.votes, 0);
+            const chosenId = voted[p.id];
             return (
               <div key={p.id} style={{ background: "#161a2b", border: "1px solid #262c44", borderRadius: 14, padding: "18px 20px" }}>
                 <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 14 }}>{p.question}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {p.options.map((o, i) => {
                     const pct = total ? Math.round((o.votes / total) * 100) : 0;
+                    const chosen = chosenId === o.id;
                     return (
                       <button
                         key={o.id}
                         onClick={() => vote(p.id, o.id)}
-                        title="Click to vote"
+                        disabled={chosenId != null}
+                        title={chosenId != null ? "You already voted on this poll" : "Click to vote"}
                         style={{
                           position: "relative",
                           overflow: "hidden",
                           textAlign: "left",
                           background: "#10131f",
-                          border: "1px solid #262c44",
+                          border: `1px solid ${chosen ? "#0ea5e9" : "#262c44"}`,
                           borderRadius: 10,
                           padding: "12px 14px",
-                          cursor: "pointer",
+                          cursor: chosenId != null ? "default" : "pointer",
                           color: "#e7e9f5",
                           display: "flex",
                           justifyContent: "space-between",
@@ -189,7 +193,10 @@ export default function PollWaveDemo() {
                             transition: "width 0.5s ease",
                           }}
                         />
-                        <span style={{ position: "relative", fontWeight: 500 }}>{o.text}</span>
+                        <span style={{ position: "relative", fontWeight: 500 }}>
+                          {chosen && <span style={{ color: "#86efac", fontWeight: 700 }}>✓ </span>}
+                          {o.text}
+                        </span>
                         <span style={{ position: "relative", color: "#9298bd", fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
                           {pct}% · {o.votes}
                         </span>
@@ -199,7 +206,7 @@ export default function PollWaveDemo() {
                 </div>
                 <div style={{ marginTop: 12, color: "#9298bd", fontSize: 13 }}>
                   {total} vote{total === 1 ? "" : "s"}
-                  {voted.has(p.id) && <span style={{ color: "#86efac" }}> · thanks for voting!</span>}
+                  {chosenId != null && <span style={{ color: "#86efac" }}> · thanks for voting!</span>}
                 </div>
               </div>
             );
