@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Github } from "lucide-react";
+import "./demos.css";
 
 interface DemoShellProps {
   title: string;
@@ -57,8 +58,9 @@ export default function DemoShell({
           <span style={{ color: accent, marginRight: 6 }}>●</span>
           {title}
         </span>
-        <span style={{ color: "#9aa3b5", fontSize: 12 }}>{tagline}</span>
+        <span className="demo-head-tagline" style={{ color: "#9aa3b5", fontSize: 12 }}>{tagline}</span>
         <span
+          className="demo-badge"
           style={{
             marginLeft: "auto",
             fontSize: 10,

@@ -157,7 +157,7 @@ export default function SnapNoteDemo() {
       github="https://github.com/Sextty/SnapNote"
       bg="#0f1117"
     >
-      <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", minHeight: "calc(100vh - 49px)" }}>
+      <div className="demo-split-snap">
         {/* sidebar */}
         <aside style={{ borderRight: "1px solid #262b38", padding: 16, display: "flex", flexDirection: "column", minWidth: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>

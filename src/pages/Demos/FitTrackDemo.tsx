@@ -168,7 +168,7 @@ export default function FitTrackDemo() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 18, marginBottom: 18 }}>
+        <div className="demo-grid-ft-a">
           {/* weekly volume bars */}
           <div style={panel}>
             <h2 style={{ fontSize: 14, fontWeight: 600, margin: "0 0 12px", color: "#c7d9cf" }}>
@@ -238,7 +238,7 @@ export default function FitTrackDemo() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 18 }}>
+        <div className="demo-grid-ft-b">
           {/* log form */}
           <div style={panel}>
             <h2 style={{ fontSize: 14, fontWeight: 600, margin: "0 0 12px", color: "#c7d9cf" }}>Log a workout</h2>

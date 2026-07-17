@@ -149,7 +149,7 @@ export default function ChatFlowDemo() {
 
   return (
     <DemoShell title="ChatFlow AI" tagline="Real-Time Messaging" accent="#8b5cf6" github="https://github.com/Sextty/ChatFlow-AI" bg="#0e0f1a">
-      <div style={{ display: "grid", gridTemplateColumns: "210px 1fr", height: "calc(100vh - 49px)" }}>
+      <div className="demo-split-chat">
         <aside style={{ background: "#181a2a", borderRight: "1px solid #262a42", padding: 16 }}>
           <div style={{ textTransform: "uppercase", fontSize: 12, letterSpacing: "0.08em", color: "#9aa0bd", marginBottom: 10 }}>Rooms</div>
           {ROOMS.map((r) => (

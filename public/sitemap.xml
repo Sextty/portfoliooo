@@ -13,7 +13,63 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://portfoliowassim.vercel.app/project/devpulse</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/project/chatflow-ai</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/project/cloudvault</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/project/taskforge</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/project/snapnote</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/project/fittrack</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/project/pollwave</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://portfoliowassim.vercel.app/girls-boutique</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/devpulse</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/chatflow-ai</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/cloudvault</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/taskforge</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/snapnote</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/fittrack</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/pollwave</loc>
     <priority>0.5</priority>
   </url>
 </urlset>

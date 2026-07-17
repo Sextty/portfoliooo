@@ -104,7 +104,7 @@ export default function CloudVaultDemo() {
       bg="#0c1116"
     >
       <div style={{ maxWidth: 1020, margin: "0 auto", padding: "24px 20px 60px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20 }}>
+        <div className="demo-grid-cv">
           <div>
             {/* dropzone */}
             <div
