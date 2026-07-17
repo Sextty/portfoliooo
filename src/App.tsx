@@ -7,6 +7,7 @@ const ProjectZone = lazy(() => import("@/pages/ProjectZone"));
 const AdminPanel = lazy(() => import("@/pages/AdminPanel"));
 const ProjectPreview = lazy(() => import("@/pages/ProjectPreview"));
 const GirlsBoutiqueRoute = lazy(() => import("@/pages/GirlsBoutique"));
+const DemoRoute = lazy(() => import("@/pages/Demos"));
 
 function RouteLoader() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/project/:id" element={<ProjectPreview />} />
           <Route path="/girls-boutique" element={<GirlsBoutiqueRoute />} />
+          <Route path="/demo/:id" element={<DemoRoute />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
-import { Github, Play, ExternalLink, ArrowUpRight } from "lucide-react";
+import { Github, Play, Zap, ArrowUpRight } from "lucide-react";
 import { Project } from "@/utils/projectDb";
 import { COLORS } from "@/theme/palette";
 
@@ -35,6 +35,35 @@ const iconHoverEnter = (e: React.MouseEvent<HTMLElement>) => {
 const iconHoverLeave = (e: React.MouseEvent<HTMLElement>) => {
   e.currentTarget.style.color = COLORS.trace;
   e.currentTarget.style.borderColor = COLORS.line;
+};
+
+// Labeled "run it now" button — the card's primary action when a demo exists.
+const liveDemoButtonStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 5,
+  height: 32,
+  padding: "0 10px",
+  fontSize: 10,
+  fontWeight: 700,
+  letterSpacing: "0.12em",
+  border: `1px solid ${COLORS.redline}`,
+  borderRadius: 2,
+  background: "transparent",
+  color: COLORS.redline,
+  cursor: "pointer",
+  transition: "background 0.2s, color 0.2s",
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+};
+
+const liveDemoHoverEnter = (e: React.MouseEvent<HTMLElement>) => {
+  e.currentTarget.style.background = COLORS.redline;
+  e.currentTarget.style.color = "#0B1E36";
+};
+const liveDemoHoverLeave = (e: React.MouseEvent<HTMLElement>) => {
+  e.currentTarget.style.background = "transparent";
+  e.currentTarget.style.color = COLORS.redline;
 };
 
 export function ProjectCard({
@@ -258,26 +287,28 @@ export function ProjectCard({
                 (project.runUrl.startsWith("/") ? (
                   <Link
                     to={project.runUrl}
-                    style={iconButtonStyle}
-                    onMouseEnter={iconHoverEnter}
-                    onMouseLeave={iconHoverLeave}
-                    title="Live Demo"
+                    className="mono"
+                    style={liveDemoButtonStyle}
+                    onMouseEnter={liveDemoHoverEnter}
+                    onMouseLeave={liveDemoHoverLeave}
+                    title="Run this project in your browser"
                     aria-label={`Open live demo of ${project.title}`}
                   >
-                    <ExternalLink size={14} />
+                    <Zap size={12} /> LIVE DEMO
                   </Link>
                 ) : (
                   <a
                     href={project.runUrl}
                     target="_blank"
                     rel="noreferrer"
-                    style={iconButtonStyle}
-                    onMouseEnter={iconHoverEnter}
-                    onMouseLeave={iconHoverLeave}
-                    title="Live Demo"
+                    className="mono"
+                    style={liveDemoButtonStyle}
+                    onMouseEnter={liveDemoHoverEnter}
+                    onMouseLeave={liveDemoHoverLeave}
+                    title="Run this project in your browser"
                     aria-label={`Open live demo of ${project.title}`}
                   >
-                    <ExternalLink size={14} />
+                    <Zap size={12} /> LIVE DEMO
                   </a>
                 ))}
             </div>

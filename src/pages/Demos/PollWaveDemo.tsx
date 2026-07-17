@@ -1,0 +1,212 @@
+import { useEffect, useState } from "react";
+import DemoShell from "./DemoShell";
+
+interface Option {
+  id: number;
+  text: string;
+  votes: number;
+}
+interface Poll {
+  id: number;
+  question: string;
+  options: Option[];
+}
+
+const COLORS = ["#6366f1", "#06b6d4", "#22c55e", "#f59e0b", "#ec4899", "#ef4444"];
+
+const seed: Poll[] = [
+  {
+    id: 1,
+    question: "What should we build next?",
+    options: [
+      { id: 1, text: "Mobile app", votes: 14 },
+      { id: 2, text: "Public API", votes: 9 },
+      { id: 3, text: "Dark mode", votes: 21 },
+      { id: 4, text: "Integrations", votes: 6 },
+    ],
+  },
+  {
+    id: 2,
+    question: "Best language for backends?",
+    options: [
+      { id: 5, text: "TypeScript", votes: 18 },
+      { id: 6, text: "Go", votes: 12 },
+      { id: 7, text: "Python", votes: 15 },
+      { id: 8, text: "Rust", votes: 8 },
+    ],
+  },
+];
+
+export default function PollWaveDemo() {
+  const [polls, setPolls] = useState<Poll[]>(seed);
+  const [voted, setVoted] = useState<Set<number>>(new Set());
+  const [creating, setCreating] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [opts, setOpts] = useState(["", ""]);
+
+  // Simulated remote voters — in the real app this arrives over a WebSocket
+  // fed by Redis pub/sub; here an interval plays that role.
+  useEffect(() => {
+    const t = setInterval(() => {
+      setPolls((prev) =>
+        prev.map((p) => {
+          if (Math.random() > 0.55) return p;
+          const i = Math.floor(Math.random() * p.options.length);
+          return {
+            ...p,
+            options: p.options.map((o, j) => (j === i ? { ...o, votes: o.votes + 1 } : o)),
+          };
+        }),
+      );
+    }, 1800);
+    return () => clearInterval(t);
+  }, []);
+
+  const vote = (pollId: number, optionId: number) => {
+    setVoted((s) => new Set(s).add(pollId));
+    setPolls((prev) =>
+      prev.map((p) =>
+        p.id === pollId
+          ? { ...p, options: p.options.map((o) => (o.id === optionId ? { ...o, votes: o.votes + 1 } : o)) }
+          : p,
+      ),
+    );
+  };
+
+  const createPoll = () => {
+    const clean = opts.map((o) => o.trim()).filter(Boolean);
+    if (!question.trim() || clean.length < 2) return;
+    const base = Date.now();
+    setPolls((prev) => [
+      {
+        id: base,
+        question: question.trim(),
+        options: clean.map((text, i) => ({ id: base + i + 1, text, votes: 0 })),
+      },
+      ...prev,
+    ]);
+    setQuestion("");
+    setOpts(["", ""]);
+    setCreating(false);
+  };
+
+  const input: React.CSSProperties = {
+    padding: "10px 12px",
+    borderRadius: 8,
+    border: "1px solid #262c44",
+    background: "#10131f",
+    color: "#e7e9f5",
+  };
+
+  return (
+    <DemoShell
+      title="PollWave"
+      tagline="Live Polls"
+      accent="#0ea5e9"
+      github="https://github.com/Sextty/PollWave"
+      bg="#0d0f1a"
+    >
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "26px 20px 60px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#86efac", fontSize: 13, marginBottom: 14 }}>
+          <span
+            style={{
+              width: 9,
+              height: 9,
+              borderRadius: "50%",
+              background: "#22c55e",
+              display: "inline-block",
+              animation: "pulse 1.6s infinite",
+            }}
+          />
+          Live — other voters are simulated in-browser (Redis pub/sub + WebSockets in the real app)
+        </div>
+
+        {creating ? (
+          <div style={{ background: "#161a2b", border: "1px solid #262c44", borderRadius: 12, padding: 16, marginBottom: 18, display: "flex", flexDirection: "column", gap: 8 }}>
+            <input style={{ ...input, fontWeight: 600 }} placeholder="Ask a question…" value={question} onChange={(e) => setQuestion(e.target.value)} autoFocus />
+            {opts.map((o, i) => (
+              <input
+                key={i}
+                style={input}
+                placeholder={`Option ${i + 1}`}
+                value={o}
+                onChange={(e) => setOpts(opts.map((x, j) => (j === i ? e.target.value : x)))}
+              />
+            ))}
+            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+              <button onClick={() => setOpts([...opts, ""])} style={{ ...input, cursor: "pointer" }}>+ Option</button>
+              <button onClick={createPoll} style={{ background: "#0ea5e9", border: "none", color: "white", borderRadius: 8, padding: "8px 16px", cursor: "pointer", fontWeight: 600 }}>Create</button>
+              <button onClick={() => setCreating(false)} style={{ ...input, cursor: "pointer" }}>Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setCreating(true)}
+            style={{ margin: "0 0 18px", background: "#161a2b", border: "1px dashed #262c44", color: "#9298bd", borderRadius: 10, padding: "12px 16px", cursor: "pointer", width: "100%" }}
+          >
+            + Create a poll
+          </button>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {polls.map((p) => {
+            const total = p.options.reduce((s, o) => s + o.votes, 0);
+            return (
+              <div key={p.id} style={{ background: "#161a2b", border: "1px solid #262c44", borderRadius: 14, padding: "18px 20px" }}>
+                <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 14 }}>{p.question}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {p.options.map((o, i) => {
+                    const pct = total ? Math.round((o.votes / total) * 100) : 0;
+                    return (
+                      <button
+                        key={o.id}
+                        onClick={() => vote(p.id, o.id)}
+                        title="Click to vote"
+                        style={{
+                          position: "relative",
+                          overflow: "hidden",
+                          textAlign: "left",
+                          background: "#10131f",
+                          border: "1px solid #262c44",
+                          borderRadius: 10,
+                          padding: "12px 14px",
+                          cursor: "pointer",
+                          color: "#e7e9f5",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span
+                          style={{
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: `${pct}%`,
+                            opacity: 0.28,
+                            background: COLORS[i % COLORS.length],
+                            transition: "width 0.5s ease",
+                          }}
+                        />
+                        <span style={{ position: "relative", fontWeight: 500 }}>{o.text}</span>
+                        <span style={{ position: "relative", color: "#9298bd", fontSize: 13, fontVariantNumeric: "tabular-nums" }}>
+                          {pct}% · {o.votes}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ marginTop: 12, color: "#9298bd", fontSize: 13 }}>
+                  {total} vote{total === 1 ? "" : "s"}
+                  {voted.has(p.id) && <span style={{ color: "#86efac" }}> · thanks for voting!</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <style>{`@keyframes pulse { 70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }`}</style>
+    </DemoShell>
+  );
+}
