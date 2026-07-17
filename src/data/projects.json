@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "projects": [
     {
       "id": "girls-boutique",
@@ -18,7 +18,7 @@
       "id": "devpulse",
       "title": "DevPulse",
       "tagline": "Developer Analytics Dashboard",
-      "description": "Real-time engineering metrics platform with CI/CD pipeline insights, team velocity charts, and automated performance reports.",
+      "description": "Real-time engineering metrics platform with CI/CD pipeline insights, team velocity charts, and deploy analytics. React + D3.js frontend, FastAPI backend, and a ClickHouse event store — runs end-to-end with docker-compose.",
       "tags": ["React", "Python", "FastAPI", "ClickHouse", "D3.js"],
       "featured": true,
       "color": "#10b981",
@@ -31,7 +31,7 @@
       "id": "chatflow-ai",
       "title": "ChatFlow AI",
       "tagline": "Real-Time Messaging with AI",
-      "description": "Scalable messaging platform with AI-powered smart replies, conversation threading, voice messages, and end-to-end encryption.",
+      "description": "Scalable messaging platform with real-time delivery, typing indicators, presence, and AI-powered smart replies. Next.js + Socket.io, MongoDB for history, Redis adapter for scale, OpenAI for suggestions (with a graceful fallback).",
       "tags": ["Next.js", "Socket.io", "Redis", "OpenAI", "MongoDB"],
       "featured": true,
       "color": "#8b5cf6",
@@ -44,13 +44,65 @@
       "id": "cloudvault",
       "title": "CloudVault",
       "tagline": "Secure File Storage & Collaboration",
-      "description": "Team collaboration platform with version-controlled file storage, real-time document editing, and granular permission management.",
+      "description": "Team file storage with S3-compatible object storage, versioned metadata, and a live activity feed. React frontend, NestJS API, PostgreSQL, MinIO/S3, and WebSockets that sync every collaborator's view in real time.",
       "tags": ["React", "NestJS", "AWS S3", "PostgreSQL", "WebSockets"],
       "featured": false,
       "color": "#f59e0b",
       "year": "2023",
       "runUrl": "",
       "githubUrl": "https://github.com/Sextty/cloudvault",
+      "videoUrl": ""
+    },
+    {
+      "id": "taskforge",
+      "title": "TaskForge",
+      "tagline": "Drag-and-Drop Kanban Board",
+      "description": "A project board with columns, colored cards, and drag-and-drop across lanes (native HTML5 DnD, optimistic UI). React frontend, Express + Prisma API, PostgreSQL — auto-seeds a sample board on first boot.",
+      "tags": ["React", "Node.js", "Express", "Prisma", "PostgreSQL"],
+      "featured": true,
+      "color": "#6366f1",
+      "year": "2026",
+      "runUrl": "",
+      "githubUrl": "https://github.com/Sextty/taskforge",
+      "videoUrl": ""
+    },
+    {
+      "id": "snapnote",
+      "title": "SnapNote",
+      "tagline": "Markdown Notes with Search",
+      "description": "A fast markdown notes app with live preview, tags, pinning, and search across titles, content, and tags. Full-stack Next.js (App Router) with Prisma and PostgreSQL.",
+      "tags": ["Next.js", "Prisma", "PostgreSQL", "Markdown"],
+      "featured": false,
+      "color": "#14b8a6",
+      "year": "2026",
+      "runUrl": "",
+      "githubUrl": "https://github.com/Sextty/snapnote",
+      "videoUrl": ""
+    },
+    {
+      "id": "fittrack",
+      "title": "FitTrack",
+      "tagline": "Fitness & Habit Tracker",
+      "description": "Log workouts and watch weekly training volume, daily streaks, and activity breakdowns update as you go. React + Recharts frontend, Express API, MongoDB — seeded with sample history.",
+      "tags": ["React", "Recharts", "Express", "MongoDB"],
+      "featured": true,
+      "color": "#22c55e",
+      "year": "2026",
+      "runUrl": "",
+      "githubUrl": "https://github.com/Sextty/fittrack",
+      "videoUrl": ""
+    },
+    {
+      "id": "pollwave",
+      "title": "PollWave",
+      "tagline": "Real-Time Live Polls",
+      "description": "Create polls and watch votes update live across every open browser. Next.js with native WebSockets, Redis pub/sub fan-out for horizontal scale, and PostgreSQL for persistence.",
+      "tags": ["Next.js", "WebSockets", "Redis", "PostgreSQL"],
+      "featured": false,
+      "color": "#0ea5e9",
+      "year": "2026",
+      "runUrl": "",
+      "githubUrl": "https://github.com/Sextty/pollwave",
       "videoUrl": ""
     }
   ]

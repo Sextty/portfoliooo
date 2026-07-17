@@ -58,7 +58,7 @@ The portfolio is styled as an engineering drawing: a deep drafting-blue sheet, f
 - **Committed source of truth:** `src/data/projects.json` (`{ version, projects[] }`) is baked into the build — it's what **every visitor on every device** sees. Edit it (or Admin → Export for Deploy), commit & push to publish.
 - **Local cache:** `getProjects()` seeds localStorage (`wassim_portfolio_projects`) from that JSON. Bumping `version` in the JSON makes every browser drop its cached copy and reload the deployed data (legacy bare-array / `liveUrl` shapes auto-migrate). `DATA_VERSION` is exported from `projectDb.ts`.
 - **CRUD:** Full create/read/update/delete via Admin Panel (writes the local cache only — see "Publishing" below to push changes live)
-- **Default projects:** 4 seeded — Girls Boutique (real), plus DevPulse / ChatFlow AI / CloudVault (placeholders)
+- **Default projects:** 8 seeded — Girls Boutique (in-portfolio demo) plus 7 standalone full-stack repos under github.com/Sextty: DevPulse, ChatFlow AI, CloudVault, TaskForge, SnapNote, FitTrack, PollWave (each a real app with docker-compose)
 - **Optional URLs:** `runUrl` and `githubUrl` are optional; buttons only render when URL exists
 - **`ProjectCard`** — shared "mini drawing sheet" card in `src/components/ProjectCard.tsx`, used by both PublicPortfolio (`appear="scroll"`) and ProjectZone (`appear="mount"`)
 - **Videos — two modes:**
@@ -128,7 +128,7 @@ Admin edits (and uploaded videos) live only in the editing browser until baked i
 | Issue | Status | Notes |
 |-------|--------|-------|
 | Admin edits don't auto-reach visitors | ℹ️ By design (no backend) | Edits/uploads are per-browser; publish via Admin → Export for Deploy → commit `src/data/projects.json` + `public/videos/*` → push (see §2a) |
-| 3 of 4 seed projects are placeholders | ⚠️ Content | DevPulse / ChatFlow AI / CloudVault have no real repos or demos |
+| Demo videos not yet recorded | ℹ️ Content | Projects link to real GitHub repos; add `videoUrl`/`runUrl` per project as demos are recorded |
 | Pre-existing lint errors | ⚠️ Pre-existing | ~18 errors in unused `src/components/ui/*` (react-refresh rule) and GirlsBoutique (`any` types); build unaffected |
 | `src/components/ui/*` unused | ℹ️ Note | shadcn scaffolding (~45 files) + many deps not imported by any page |
 
