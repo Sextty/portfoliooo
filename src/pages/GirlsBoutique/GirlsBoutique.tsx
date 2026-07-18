@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { initDb, getDb, getProductsByCategory, getProductById, getTrendingProducts, getRelatedProducts, createOrder, svgPlaceholder } from "./db";
+import { initDb, getDb, getProductsByCategory, getProductById, getTrendingProducts, getRelatedProducts, createOrder, svgPlaceholder, searchProducts, getOrders, OrderSummary } from "./db";
 import { useStore } from "./store";
 import { Product } from "./types";
-import { ArrowLeft, ShoppingBag, Heart, X, Minus, Plus, Star, ChevronLeft, ChevronRight, Menu } from "lucide-react";
+import { ArrowLeft, ShoppingBag, Heart, X, Minus, Plus, Star, ChevronLeft, ChevronRight, Menu, Search, Package } from "lucide-react";
 
 type Page =
   | { name: "home" }
@@ -13,7 +13,9 @@ type Page =
   | { name: "product"; id: number }
   | { name: "cart" }
   | { name: "checkout" }
-  | { name: "wishlist" };
+  | { name: "wishlist" }
+  | { name: "search" }
+  | { name: "orders" };
 
 const G = { pink: "#ec4899", bg: "#060912", text: "#e8ecf4", muted: "#64748b", border: "rgba(236,72,153,0.12)", card: "rgba(236,72,153,0.04)" };
 
@@ -158,7 +160,22 @@ function Navbar({ page, setPage, cartCount }: { page: Page; setPage: (p: Page) =
 
       <div className="flex items-center gap-3">
         <motion.button whileTap={{ scale: 0.85 }}
+          onClick={() => setPage({ name: "search" })}
+          aria-label="Search the catalog"
+          style={{ position: "relative", background: "none", border: "none", cursor: "pointer", color: G.muted, padding: 4 }}
+        >
+          <Search size={18} />
+        </motion.button>
+        <motion.button whileTap={{ scale: 0.85 }}
+          onClick={() => setPage({ name: "orders" })}
+          aria-label="My orders"
+          style={{ position: "relative", background: "none", border: "none", cursor: "pointer", color: G.muted, padding: 4 }}
+        >
+          <Package size={18} />
+        </motion.button>
+        <motion.button whileTap={{ scale: 0.85 }}
           onClick={() => setPage({ name: "wishlist" })}
+          aria-label="Wishlist"
           style={{ position: "relative", background: "none", border: "none", cursor: "pointer", color: G.muted, padding: 4 }}
         >
           <Heart size={18} />
@@ -1312,6 +1329,164 @@ function Footer() {
   );
 }
 
+function SearchPage({ setPage }: { setPage: (p: Page) => void }) {
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<Product[]>([]);
+
+  useEffect(() => {
+    if (!q.trim()) {
+      setResults([]);
+      return;
+    }
+    // Real SQL LIKE query against the in-browser SQLite catalog.
+    setResults(searchProducts(q.trim()));
+  }, [q]);
+
+  return (
+    <motion.div variants={stagger} initial="initial" animate="animate" style={{ maxWidth: 900, margin: "0 auto", padding: "110px 24px 80px" }}>
+      <motion.p variants={fadeUp} style={{ fontSize: 11, letterSpacing: "0.3em", color: G.pink, textTransform: "uppercase", marginBottom: 10 }}>
+        Search the boutique
+      </motion.p>
+      <motion.div variants={fadeUp} style={{ position: "relative", marginBottom: 26 }}>
+        <Search size={18} style={{ position: "absolute", left: 18, top: "50%", transform: "translateY(-50%)", color: G.muted }} />
+        <input
+          autoFocus
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search products, brands, descriptions…"
+          aria-label="Search products"
+          style={{
+            width: "100%", boxSizing: "border-box",
+            background: G.card, border: `1px solid ${G.border}`, borderRadius: 999,
+            color: G.text, fontSize: 16, padding: "16px 22px 16px 48px", outline: "none",
+          }}
+        />
+      </motion.div>
+
+      {q.trim() === "" ? (
+        <motion.div variants={fadeUp} style={{ textAlign: "center", color: G.muted, padding: "50px 0" }}>
+          <div style={{ fontSize: 34, marginBottom: 12 }}>✦</div>
+          Try “lipstick”, “leather”, or a brand like “Fenty”.
+          <div style={{ fontSize: 12, marginTop: 8, opacity: 0.7 }}>Every search runs a real SQL query in your browser.</div>
+        </motion.div>
+      ) : results.length === 0 ? (
+        <motion.div variants={fadeUp} style={{ textAlign: "center", color: G.muted, padding: "50px 0" }}>
+          Nothing matches “{q.trim()}” — try a different word.
+        </motion.div>
+      ) : (
+        <>
+          <motion.div variants={fadeUp} style={{ color: G.muted, fontSize: 13, marginBottom: 16 }}>
+            {results.length} result{results.length === 1 ? "" : "s"}
+          </motion.div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {results.map((p) => (
+              <motion.button
+                key={p.id}
+                variants={fadeUp}
+                whileHover={{ x: 4 }}
+                onClick={() => setPage({ name: "product", id: p.id })}
+                style={{
+                  display: "flex", alignItems: "center", gap: 16, textAlign: "left",
+                  background: G.card, border: `1px solid ${G.border}`, borderRadius: 14,
+                  padding: 12, cursor: "pointer", color: G.text,
+                }}
+              >
+                <img src={imgSrc(p.image_url)} alt="" style={{ width: 58, height: 72, objectFit: "cover", borderRadius: 10, flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: G.muted }}>{p.brand}</div>
+                  <div style={{ fontWeight: 600, fontSize: 15, margin: "2px 0 4px" }}>{p.name}</div>
+                  <StarRating rating={p.rating} reviews={p.reviews} />
+                </div>
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>${p.price.toFixed(2)}</div>
+                  <div style={{ fontSize: 11, color: G.muted }}>{p.category_name}</div>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </>
+      )}
+    </motion.div>
+  );
+}
+
+function OrdersPage({ setPage }: { setPage: (p: Page) => void }) {
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
+
+  useEffect(() => {
+    setOrders(getOrders());
+  }, []);
+
+  const statusColor: Record<string, string> = { Pending: "#f59e0b", Shipped: "#38bdf8", Delivered: "#22c55e" };
+
+  return (
+    <motion.div variants={stagger} initial="initial" animate="animate" style={{ maxWidth: 760, margin: "0 auto", padding: "110px 24px 80px" }}>
+      <motion.p variants={fadeUp} style={{ fontSize: 11, letterSpacing: "0.3em", color: G.pink, textTransform: "uppercase", marginBottom: 10 }}>
+        My orders
+      </motion.p>
+      <motion.h1 variants={fadeUp} style={{ fontFamily: "'Sora', sans-serif", fontSize: 30, fontWeight: 800, margin: "0 0 24px" }}>
+        Order history
+      </motion.h1>
+
+      {orders.length === 0 ? (
+        <motion.div variants={fadeUp} style={{ textAlign: "center", background: G.card, border: `1px solid ${G.border}`, borderRadius: 18, padding: "56px 24px", color: G.muted }}>
+          <div style={{ fontSize: 34, marginBottom: 12 }}>🛍️</div>
+          <div style={{ color: G.text, fontWeight: 600, fontSize: 16, marginBottom: 6 }}>No orders yet</div>
+          <p style={{ margin: "0 0 20px", fontSize: 14 }}>
+            Place an order at checkout and it lands here — stored in the
+            in-browser SQL database.
+          </p>
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setPage({ name: "home" })}
+            style={{ background: G.pink, color: "white", border: "none", borderRadius: 999, padding: "12px 26px", fontWeight: 700, cursor: "pointer", fontSize: 14 }}
+          >
+            Start shopping
+          </motion.button>
+        </motion.div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {orders.map((o) => (
+            <motion.div key={o.id} variants={fadeUp} style={{ background: G.card, border: `1px solid ${G.border}`, borderRadius: 16, padding: "18px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
+                <span style={{ fontWeight: 700, fontSize: 15 }}>Order #{o.id}</span>
+                <span style={{ color: G.muted, fontSize: 12.5 }}>{o.order_date}</span>
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                    color: statusColor[o.status] || G.muted,
+                    border: `1px solid ${(statusColor[o.status] || G.muted)}55`,
+                    borderRadius: 999, padding: "3px 11px",
+                  }}
+                >
+                  {o.status}
+                </span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {o.items.map((it, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 13.5 }}>
+                    <img src={imgSrc(it.image_url)} alt="" style={{ width: 38, height: 48, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{it.name}</div>
+                      <div style={{ color: G.muted, fontSize: 12 }}>{it.brand} · ×{it.quantity}</div>
+                    </div>
+                    <span style={{ color: G.muted }}>${(it.unit_price * it.quantity).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", borderTop: `1px solid ${G.border}`, marginTop: 12, paddingTop: 12, fontWeight: 700, fontSize: 15 }}>
+                Total&nbsp;<span style={{ color: G.pink }}>${o.total_amount.toFixed(2)}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 export default function GirlsBoutique() {
   const [ready, setReady] = useState(false);
   const [page, setPage] = useState<Page>({ name: "home" });
@@ -1347,6 +1522,8 @@ export default function GirlsBoutique() {
         {page.name === "cart" && <CartPage setPage={setPage} />}
         {page.name === "checkout" && <CheckoutPage setPage={setPage} />}
         {page.name === "wishlist" && <WishlistPage setPage={setPage} />}
+        {page.name === "search" && <SearchPage setPage={setPage} />}
+        {page.name === "orders" && <OrdersPage setPage={setPage} />}
       </motion.main>
       <Footer />
     </div>

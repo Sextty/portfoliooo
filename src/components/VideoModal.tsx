@@ -10,7 +10,7 @@ interface VideoModalProps {
   projectColor?: string;
 }
 
-export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectColor = "#FF5C39" }: VideoModalProps) {
+export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectColor = "#2B50E0" }: VideoModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Prevent background scroll when video is playing
@@ -53,7 +53,9 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "rgba(7,21,39,0.92)",
+            background: "rgba(15,18,34,0.6)",
+            backdropFilter: "blur(4px)",
+            WebkitBackdropFilter: "blur(4px)",
             padding: 20,
           }}
           onClick={onClose}
@@ -62,19 +64,18 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
             role="dialog"
             aria-modal="true"
             aria-label={`Demo video: ${projectTitle}`}
-            initial={{ scale: 0.92, y: 15, opacity: 0 }}
+            initial={{ scale: 0.94, y: 15, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0.92, y: 15, opacity: 0 }}
+            exit={{ scale: 0.94, y: 15, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
             style={{
               position: "relative",
               width: "100%",
-              maxWidth: 800,
-              background: "#0b1e36",
-              border: `1px solid ${projectColor}`,
-              borderRadius: 2,
+              maxWidth: 840,
+              background: "#ffffff",
+              borderRadius: 20,
               overflow: "hidden",
-              boxShadow: `0 24px 60px -12px rgba(3,10,20,0.7)`,
+              boxShadow: "0 40px 100px -20px rgba(15,18,34,0.45)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -85,22 +86,32 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
                 alignItems: "center",
                 justifyContent: "space-between",
                 padding: "14px 20px",
-                borderBottom: "1px solid rgba(127,163,201,0.18)",
-                background: "rgba(7,21,39,0.6)",
+                borderBottom: "1px solid #EFF1F6",
               }}
             >
               <h3
-                className="mono"
                 style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                  fontFamily: "'Instrument Sans', sans-serif",
                   fontWeight: 600,
-                  fontSize: 12,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  color: "#e6eef7",
+                  fontSize: 14.5,
+                  color: "#0F1222",
                   margin: 0,
                 }}
               >
-                <span style={{ color: projectColor }}>DEMO</span> — {projectTitle}
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 9,
+                    height: 9,
+                    borderRadius: 999,
+                    background: projectColor,
+                    display: "inline-block",
+                  }}
+                />
+                {projectTitle} — demo video
               </h3>
               <button
                 ref={closeButtonRef}
@@ -110,22 +121,22 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  width: 32,
-                  height: 32,
-                  borderRadius: 2,
-                  background: "transparent",
-                  border: "1px solid rgba(127,163,201,0.28)",
-                  color: "#7fa3c9",
+                  width: 34,
+                  height: 34,
+                  borderRadius: 999,
+                  background: "#ffffff",
+                  border: "1px solid #E6E8F0",
+                  color: "#566070",
                   cursor: "pointer",
                   transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#ff5c39";
-                  e.currentTarget.style.borderColor = "#ff5c39";
+                  e.currentTarget.style.color = "#2B50E0";
+                  e.currentTarget.style.borderColor = "#2B50E0";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#7fa3c9";
-                  e.currentTarget.style.borderColor = "rgba(127,163,201,0.28)";
+                  e.currentTarget.style.color = "#566070";
+                  e.currentTarget.style.borderColor = "#E6E8F0";
                 }}
               >
                 <X size={16} />
@@ -133,7 +144,7 @@ export function VideoModal({ isOpen, onClose, videoSrc, projectTitle, projectCol
             </div>
 
             {/* Video Player */}
-            <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", background: "#071527" }}>
+            <div style={{ position: "relative", width: "100%", aspectRatio: "16/9", background: "#0F1222" }}>
               <video
                 src={videoSrc}
                 controls

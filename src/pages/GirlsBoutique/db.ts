@@ -109,6 +109,62 @@ function mapProducts(result: any): Product[] {
   });
 }
 
+/** Full-catalog search across name, brand, and description — real SQL LIKE. */
+export function searchProducts(q: string): Product[] {
+  const d = getDb();
+  const like = `%${q}%`;
+  return mapProducts(
+    d.exec(
+      "SELECT p.*, c.slug as category_slug, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id WHERE p.name LIKE ? OR p.brand LIKE ? OR p.description LIKE ? ORDER BY p.rating DESC",
+      [like, like, like],
+    ),
+  );
+}
+
+export interface OrderItemSummary {
+  name: string;
+  brand: string;
+  quantity: number;
+  unit_price: number;
+  image_url: string;
+}
+export interface OrderSummary {
+  id: number;
+  order_date: string;
+  status: string;
+  total_amount: number;
+  first_name: string;
+  items: OrderItemSummary[];
+}
+
+/** Orders newest-first, each with its line items joined against products. */
+export function getOrders(): OrderSummary[] {
+  const d = getDb();
+  const res = d.exec("SELECT id, order_date, status, total_amount, first_name FROM orders ORDER BY id DESC");
+  if (!res[0]) return [];
+  return res[0].values.map((row) => {
+    const items = d.exec(
+      "SELECT pr.name, pr.brand, oi.quantity, oi.unit_price, pr.image_url FROM order_items oi JOIN products pr ON pr.id = oi.product_id WHERE oi.order_id = ?",
+      [row[0] as number],
+    );
+    return {
+      id: row[0] as number,
+      order_date: String(row[1]),
+      status: String(row[2]),
+      total_amount: row[3] as number,
+      first_name: String(row[4]),
+      items:
+        items[0]?.values.map((r) => ({
+          name: String(r[0]),
+          brand: String(r[1]),
+          quantity: r[2] as number,
+          unit_price: r[3] as number,
+          image_url: String(r[4]),
+        })) ?? [],
+    };
+  });
+}
+
 export function updateProductStock(id: number, qty: number) {
   getDb().run("UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?", [qty, id, qty]);
 }

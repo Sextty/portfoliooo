@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
-import { Github, Play, Zap, ArrowUpRight } from "lucide-react";
+import { Github, Play, ArrowUpRight } from "lucide-react";
 import { Project } from "@/utils/projectDb";
+import { AppMockup, BrowserFrame } from "@/components/AppMockup";
+import { tint } from "@/utils/color";
+import { useSpotlight } from "@/utils/useSpotlight";
 import { COLORS } from "@/theme/palette";
 
 interface ProjectCardProps {
   project: Project;
   index: number;
   onWatchDemo: (src: string, title: string, color?: string) => void;
-  /** "scroll" fades in when scrolled into view (landing page); "mount" animates immediately (project index) */
+  /** "scroll" fades in when scrolled into view (landing page); "mount" animates immediately (work index) */
   appear?: "scroll" | "mount";
 }
 
@@ -17,53 +20,24 @@ const iconButtonStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  width: 32,
-  height: 32,
+  width: 34,
+  height: 34,
   border: `1px solid ${COLORS.line}`,
-  borderRadius: 2,
-  background: "transparent",
-  color: COLORS.trace,
+  borderRadius: 999,
+  background: COLORS.paper,
+  color: COLORS.slate,
   cursor: "pointer",
   transition: "color 0.2s, border-color 0.2s",
   textDecoration: "none",
 };
 
 const iconHoverEnter = (e: React.MouseEvent<HTMLElement>) => {
-  e.currentTarget.style.color = COLORS.redline;
-  e.currentTarget.style.borderColor = COLORS.redline;
+  e.currentTarget.style.color = COLORS.cobalt;
+  e.currentTarget.style.borderColor = COLORS.cobalt;
 };
 const iconHoverLeave = (e: React.MouseEvent<HTMLElement>) => {
-  e.currentTarget.style.color = COLORS.trace;
+  e.currentTarget.style.color = COLORS.slate;
   e.currentTarget.style.borderColor = COLORS.line;
-};
-
-// Labeled "run it now" button — the card's primary action when a demo exists.
-const liveDemoButtonStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 5,
-  height: 32,
-  padding: "0 10px",
-  fontSize: 10,
-  fontWeight: 700,
-  letterSpacing: "0.12em",
-  border: `1px solid ${COLORS.redline}`,
-  borderRadius: 2,
-  background: "transparent",
-  color: COLORS.redline,
-  cursor: "pointer",
-  transition: "background 0.2s, color 0.2s",
-  textDecoration: "none",
-  whiteSpace: "nowrap",
-};
-
-const liveDemoHoverEnter = (e: React.MouseEvent<HTMLElement>) => {
-  e.currentTarget.style.background = COLORS.redline;
-  e.currentTarget.style.color = "#0B1E36";
-};
-const liveDemoHoverLeave = (e: React.MouseEvent<HTMLElement>) => {
-  e.currentTarget.style.background = "transparent";
-  e.currentTarget.style.color = COLORS.redline;
 };
 
 export function ProjectCard({
@@ -74,6 +48,7 @@ export function ProjectCard({
 }: ProjectCardProps) {
   const [hasDbVideo, setHasDbVideo] = useState(false);
   const [dbVideoUrl, setDbVideoUrl] = useState<string | null>(null);
+  const spotlight = useSpotlight();
 
   useEffect(() => {
     let active = true;
@@ -105,150 +80,126 @@ export function ProjectCard({
   const entrance =
     appear === "scroll"
       ? {
-          initial: { opacity: 0, y: 50 },
+          initial: { opacity: 0, y: 40 },
           whileInView: { opacity: 1, y: 0 },
           viewport: { once: true },
-          transition: { duration: 0.7, delay: index * 0.12 },
+          transition: { duration: 0.6, delay: (index % 3) * 0.08 },
         }
       : {
-          initial: { opacity: 0, y: 30 },
+          initial: { opacity: 0, y: 24 },
           animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.6, delay: index * 0.08 },
+          transition: { duration: 0.5, delay: (index % 6) * 0.06 },
         };
 
-  const figNo = String(index + 1).padStart(2, "0");
+  const isInternalDemo = project.runUrl?.startsWith("/");
+  const frameUrl = isInternalDemo
+    ? `portfoliowassim.vercel.app${project.runUrl}`
+    : project.githubUrl
+      ? project.githubUrl.replace("https://", "")
+      : project.title.toLowerCase();
 
   return (
     <motion.div {...entrance} className="h-full">
-      <div className="sheet tech-hover overflow-hidden relative h-full flex flex-col">
-        {/* Sheet header strip */}
-        <div
-          className="mono flex items-center justify-between px-5 py-2.5"
+      <div
+        onMouseMove={spotlight}
+        className="sheet tech-hover spotlight overflow-hidden relative h-full flex flex-col"
+      >
+        {/* Product miniature on a tinted stage */}
+        <Link
+          to={`/project/${project.id}`}
+          aria-label={`Open ${project.title} case study`}
           style={{
-            fontSize: 10,
-            letterSpacing: "0.14em",
+            display: "block",
+            padding: "22px 22px 0",
+            background: `linear-gradient(160deg, ${tint(project.color, 0.12)}, ${tint(project.color, 0.03)})`,
             borderBottom: `1px solid ${COLORS.lineFaint}`,
           }}
         >
-          <span className="flex items-center gap-2">
-            <span style={{ color: COLORS.redline, fontWeight: 600 }}>
-              FIG. {figNo}
-            </span>
-            {/* Revision color code from the project's accent */}
-            <span
-              aria-hidden="true"
-              style={{
-                width: 8,
-                height: 8,
-                background: project.color,
-                display: "inline-block",
-              }}
-            />
-          </span>
-          <span style={{ color: COLORS.trace }}>{project.year}</span>
-        </div>
-
-        {project.image && (
-          <div
-            className="w-full h-48 overflow-hidden relative"
-            style={{ borderBottom: `1px solid ${COLORS.lineFaint}` }}
-          >
-            <img
-              src={project.image}
-              alt={project.title}
-              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-              style={{ filter: "saturate(0.9)" }}
-            />
-          </div>
-        )}
-
-        <div className="p-6 flex flex-col flex-grow">
-          {/* Title */}
-          <Link to={`/project/${project.id}`} style={{ textDecoration: "none" }}>
-            <h3
-              className="display"
-              style={{
-                fontWeight: 700,
-                fontSize: "1.15rem",
-                letterSpacing: "0.03em",
-                color: COLORS.print,
-                cursor: "pointer",
-                transition: "color 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = COLORS.redline;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = COLORS.print;
-              }}
-            >
-              {project.title}
-            </h3>
-          </Link>
-          <p
-            className="mono"
+          <BrowserFrame
+            url={frameUrl}
+            flat
             style={{
-              fontSize: 11,
-              letterSpacing: "0.06em",
-              color: COLORS.trace,
-              marginTop: 4,
+              borderRadius: "12px 12px 0 0",
+              borderBottom: "none",
+              boxShadow: "0 -1px 0 rgba(15,18,34,0.02)",
             }}
           >
+            <AppMockup projectId={project.id} color={project.color} />
+          </BrowserFrame>
+        </Link>
+
+        <div className="p-6 flex flex-col flex-grow">
+          {/* Title row */}
+          <div className="flex items-start justify-between gap-3">
+            <Link to={`/project/${project.id}`} style={{ textDecoration: "none" }}>
+              <h3
+                className="display"
+                style={{
+                  fontSize: "1.2rem",
+                  color: COLORS.ink,
+                  transition: "color 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = COLORS.cobalt;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = COLORS.ink;
+                }}
+              >
+                {project.title}
+              </h3>
+            </Link>
+            <span
+              className="mono"
+              style={{ fontSize: 11, color: "#9AA2B8", marginTop: 6 }}
+            >
+              {project.year}
+            </span>
+          </div>
+          <p style={{ fontSize: 13.5, fontWeight: 500, color: COLORS.slate, marginTop: 2 }}>
             {project.tagline}
           </p>
 
           {/* Description */}
           <p
             style={{
-              color: COLORS.trace,
+              color: COLORS.slate,
               fontSize: 14,
-              lineHeight: 1.75,
-              margin: "1rem 0 1.25rem",
+              lineHeight: 1.65,
+              margin: "0.85rem 0 1.1rem",
             }}
           >
             {project.description}
           </p>
 
           {/* Stack */}
-          <div className="flex flex-wrap gap-2 mb-5">
+          <div className="flex flex-wrap gap-1.5 mb-5">
             {project.tags.map((t) => (
-              <span
-                key={t}
-                className="mono"
-                style={{
-                  fontSize: 10,
-                  color: COLORS.trace,
-                  border: `1px solid ${COLORS.lineFaint}`,
-                  padding: "3px 8px",
-                  letterSpacing: "0.04em",
-                }}
-              >
+              <span key={t} className="chip">
                 {t}
               </span>
             ))}
           </div>
 
-          {/* Footer: open sheet + actions */}
+          {/* Footer actions */}
           <div
-            className="flex items-center justify-between mt-auto pt-4"
+            className="flex items-center justify-between gap-3 mt-auto pt-4"
             style={{ borderTop: `1px solid ${COLORS.lineFaint}` }}
           >
             <Link
               to={`/project/${project.id}`}
-              className="mono flex items-center gap-1.5"
+              className="flex items-center gap-1"
               style={{
-                fontSize: 11,
+                fontSize: 13.5,
                 fontWeight: 600,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: COLORS.redline,
+                color: COLORS.cobalt,
                 textDecoration: "none",
               }}
             >
-              Open Sheet <ArrowUpRight size={13} />
+              Case study <ArrowUpRight size={14} />
             </Link>
 
-            <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+            <div className="flex gap-2 items-center" onClick={(e) => e.stopPropagation()}>
               {project.githubUrl && (
                 <a
                   href={project.githubUrl}
@@ -257,10 +208,10 @@ export function ProjectCard({
                   style={iconButtonStyle}
                   onMouseEnter={iconHoverEnter}
                   onMouseLeave={iconHoverLeave}
-                  title="View Source Code"
+                  title="View source code"
                   aria-label={`View source code of ${project.title} on GitHub`}
                 >
-                  <Github size={14} />
+                  <Github size={15} />
                 </a>
               )}
 
@@ -276,7 +227,7 @@ export function ProjectCard({
                   style={iconButtonStyle}
                   onMouseEnter={iconHoverEnter}
                   onMouseLeave={iconHoverLeave}
-                  title="Watch Demo Video"
+                  title="Watch demo video"
                   aria-label={`Watch demo video of ${project.title}`}
                 >
                   <Play size={14} fill="currentColor" />
@@ -284,31 +235,35 @@ export function ProjectCard({
               )}
 
               {project.runUrl &&
-                (project.runUrl.startsWith("/") ? (
+                (isInternalDemo ? (
                   <Link
                     to={project.runUrl}
-                    className="mono"
-                    style={liveDemoButtonStyle}
-                    onMouseEnter={liveDemoHoverEnter}
-                    onMouseLeave={liveDemoHoverLeave}
+                    className="btn-primary"
+                    style={{
+                      padding: "8px 15px",
+                      fontSize: 13,
+                      textDecoration: "none",
+                    }}
                     title="Run this project in your browser"
                     aria-label={`Open live demo of ${project.title}`}
                   >
-                    <Zap size={12} /> LIVE DEMO
+                    Live demo
                   </Link>
                 ) : (
                   <a
                     href={project.runUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mono"
-                    style={liveDemoButtonStyle}
-                    onMouseEnter={liveDemoHoverEnter}
-                    onMouseLeave={liveDemoHoverLeave}
+                    className="btn-primary"
+                    style={{
+                      padding: "8px 15px",
+                      fontSize: 13,
+                      textDecoration: "none",
+                    }}
                     title="Run this project in your browser"
                     aria-label={`Open live demo of ${project.title}`}
                   >
-                    <Zap size={12} /> LIVE DEMO
+                    Live demo
                   </a>
                 ))}
             </div>

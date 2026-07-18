@@ -1,45 +1,91 @@
-/* ═══ BLUEPRINT DESIGN SYSTEM ═══════════════════════════════
-   Drafting Blue sheet · Print White linework · Trace Blue
-   annotations · one Redline accent. No blur, no gradients,
-   no tilt — flat drawing sheets with hairlines and ticks.  */
+/* ═══ HARBOR DESIGN SYSTEM ═══════════════════════════════════
+   The commercial rebrand: porcelain ground, paper surfaces,
+   ink text, one cobalt accent. Soft radii, hairline borders,
+   quiet shadows — each project's own color lives inside its
+   product frame, the chrome around it stays disciplined.
+
+   Legacy class names (.sheet, .glow-input, .fig-tag, .stamp,
+   .title-block, …) are kept and restyled so older screens
+   (AdminPanel) inherit the rebrand without a rewrite.        */
 
 /* ─── Global Reset & Typography ──────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 html {
   scroll-behavior: smooth;
   font-size: 16px;
-  /* Archivo carries a width axis; Plex faces ignore this. */
-  font-stretch: 125%;
 }
-body { font-family: 'IBM Plex Sans', sans-serif; background: #0b1e36; }
-h1, h2, h3, h4, h5 { font-family: 'Archivo', sans-serif; }
-.mono { font-family: 'IBM Plex Mono', monospace; }
+body {
+  font-family: 'Instrument Sans', sans-serif;
+  background: #f6f7f9;
+  color: #0f1222;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5 { font-family: 'Bricolage Grotesque', sans-serif; }
+.mono { font-family: 'JetBrains Mono', monospace; }
 
-/* Display plate lettering */
+/* Display headlines */
 .display {
-  font-family: 'Archivo', sans-serif;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.015em;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.022em;
 }
 
-::selection { background: #ff5c39; color: #071527; }
+::selection { background: #2b50e0; color: #ffffff; }
 
 :focus-visible {
-  outline: 2px solid #ff5c39;
+  outline: 2px solid #2b50e0;
   outline-offset: 2px;
 }
 
 /* ─── Custom Scrollbar ───────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(127,163,201,0.4); border-radius: 0; }
+::-webkit-scrollbar-thumb {
+  background: #d3d8e4;
+  border-radius: 999px;
+  border: 2px solid #f6f7f9;
+}
+::-webkit-scrollbar-thumb:hover { background: #b8bfd0; }
 
-/* ─── Keyframe Animations ────────────────────────────────── */
+/* ─── Keyframes ──────────────────────────────────────────── */
 @keyframes bounce-arrow {
   0%, 100% { transform: translateY(0);   opacity: 1; }
   50%      { transform: translateY(9px); opacity: 0.4; }
 }
+
+/* Stack strip drift on the landing page */
+@keyframes strip-drift {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Mockup micro-life: typing dots, chart bars, live pulse */
+@keyframes mk-typing {
+  0%, 60%, 100% { transform: translateY(0);    opacity: 0.4; }
+  30%           { transform: translateY(-3px); opacity: 1;   }
+}
+@keyframes mk-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes mk-grow-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(14,159,110,0.45); }
+  60%      { box-shadow: 0 0 0 5px rgba(14,159,110,0); }
+}
+
+@keyframes spin-ring {
+  to { transform: rotate(360deg); }
+}
+
+/* Request flow along architecture-diagram connectors */
+@keyframes arch-flow-kf {
+  to { stroke-dashoffset: -18; }
+}
+.arch-flow { animation: arch-flow-kf 1.4s linear infinite; }
 
 /* Kept for the Girls Boutique demo (its own brand) */
 @keyframes gb-marquee {
@@ -49,220 +95,267 @@ h1, h2, h3, h4, h5 { font-family: 'Archivo', sans-serif; }
 
 /* ─── Animation Utility Classes ──────────────────────────── */
 .bounce-anim { animation: bounce-arrow 2.2s ease-in-out infinite; }
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #0e9f6e;
+  animation: live-pulse 2.4s ease-out infinite;
+}
 
-/* ─── Sheet (flat panel) — .glass kept as alias ──────────── */
+/* ─── Card surface — .sheet/.glass kept as aliases ───────── */
 .sheet,
 .glass,
-.glass-em {
-  background: rgba(7,21,39,0.6);
-  border: 1px solid rgba(127,163,201,0.22);
+.glass-em,
+.card-surface {
+  background: #ffffff;
+  border: 1px solid #e6e8f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15,18,34,0.04);
 }
 
-/* ─── Sheet Grid (page background) — .dot-grid kept as alias ─ */
+/* ─── Page ground — .sheet-grid/.dot-grid kept as aliases ── */
 .sheet-grid,
 .dot-grid {
-  background-image:
-    linear-gradient(rgba(127,163,201,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(127,163,201,0.05) 1px, transparent 1px),
-    linear-gradient(rgba(127,163,201,0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(127,163,201,0.09) 1px, transparent 1px);
-  background-size: 24px 24px, 24px 24px, 96px 96px, 96px 96px;
+  background-color: #f6f7f9;
 }
 
-/* ─── Drawing Frame (fixed sheet border with crosshair corners) ─ */
-.drawing-frame {
-  position: fixed;
-  inset: 10px;
-  pointer-events: none;
-  z-index: 60;
-  border: 1px solid rgba(127,163,201,0.25);
-}
-.drawing-frame::before,
-.drawing-frame::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background:
-    linear-gradient(#7fa3c9,#7fa3c9) left top / 10px 1px,
-    linear-gradient(#7fa3c9,#7fa3c9) left top / 1px 10px,
-    linear-gradient(#7fa3c9,#7fa3c9) right bottom / 10px 1px,
-    linear-gradient(#7fa3c9,#7fa3c9) right bottom / 1px 10px;
-  background-repeat: no-repeat;
-}
-.drawing-frame::after {
-  background:
-    linear-gradient(#7fa3c9,#7fa3c9) right top / 10px 1px,
-    linear-gradient(#7fa3c9,#7fa3c9) right top / 1px 10px,
-    linear-gradient(#7fa3c9,#7fa3c9) left bottom / 10px 1px,
-    linear-gradient(#7fa3c9,#7fa3c9) left bottom / 1px 10px;
-  background-repeat: no-repeat;
-}
+/* ─── Blueprint-era chrome, retired ──────────────────────── */
+.drawing-frame { display: none; }
+.corner-ticks::after { content: none; }
 
-/* ─── Corner Ticks (photo / card registration marks) ─────── */
-.corner-ticks { position: relative; }
-.corner-ticks::after {
-  content: "";
-  position: absolute;
-  inset: -7px;
-  pointer-events: none;
-  background:
-    linear-gradient(#7fa3c9,#7fa3c9) left top / 14px 1.5px,
-    linear-gradient(#7fa3c9,#7fa3c9) left top / 1.5px 14px,
-    linear-gradient(#7fa3c9,#7fa3c9) right top / 14px 1.5px,
-    linear-gradient(#7fa3c9,#7fa3c9) right top / 1.5px 14px,
-    linear-gradient(#7fa3c9,#7fa3c9) left bottom / 14px 1.5px,
-    linear-gradient(#7fa3c9,#7fa3c9) left bottom / 1.5px 14px,
-    linear-gradient(#7fa3c9,#7fa3c9) right bottom / 14px 1.5px,
-    linear-gradient(#7fa3c9,#7fa3c9) right bottom / 1.5px 14px;
-  background-repeat: no-repeat;
-}
-
-/* ─── Dimension Line — .gradient-line kept as alias ──────── */
+/* ─── Divider — .dimension-line kept as alias ────────────── */
 .dimension-line,
 .gradient-line {
-  height: 9px;
-  position: relative;
-  background:
-    linear-gradient(rgba(127,163,201,0.45), rgba(127,163,201,0.45)) center / 100% 1px no-repeat;
+  height: 1px;
+  background: #e6e8f0;
 }
 .dimension-line::before,
-.gradient-line::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1px;
-  height: 100%;
-  background: rgba(127,163,201,0.6);
-}
 .dimension-line::after,
-.gradient-line::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 1px;
-  height: 100%;
-  background: rgba(127,163,201,0.6);
-}
+.gradient-line::before,
+.gradient-line::after { content: none; }
 
-/* ─── Rubber Stamp ───────────────────────────────────────── */
+/* ─── Badge — .stamp kept as alias ───────────────────────── */
 .stamp {
-  display: inline-block;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #ff5c39;
-  border: 2px solid #ff5c39;
-  outline: 1px solid rgba(255,92,57,0.45);
-  outline-offset: 3px;
-  padding: 7px 12px;
-  background: rgba(11,30,54,0.9);
-  transform: rotate(-4deg);
+  color: #0e9f6e;
+  background: #ffffff;
+  border: 1px solid #e6e8f0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  box-shadow: 0 6px 18px rgba(15,18,34,0.08);
+}
+.stamp::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #0e9f6e;
+  animation: live-pulse 2.4s ease-out infinite;
 }
 
-/* ─── Inputs — .glow-input kept, restyled flat ────────────── */
+/* ─── Inputs — .glow-input kept as alias ─────────────────── */
 .glow-input {
-  background: rgba(7,21,39,0.75);
-  border: 1px solid rgba(127,163,201,0.3);
-  border-radius: 2px;
-  color: #e6eef7;
-  font-family: 'IBM Plex Sans', sans-serif;
+  background: #ffffff;
+  border: 1px solid #d9deea;
+  border-radius: 12px;
+  color: #0f1222;
+  font-family: 'Instrument Sans', sans-serif;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   outline: none;
 }
-.glow-input::placeholder { color: rgba(127,163,201,0.55); }
+.glow-input::placeholder { color: #9aa2b8; }
 .glow-input:focus,
 .glow-input-em:focus {
-  border-color: #ff5c39;
-  box-shadow: 0 0 0 1px rgba(255,92,57,0.35);
+  border-color: #2b50e0;
+  box-shadow: 0 0 0 3px rgba(43,80,224,0.14);
 }
 
-/* ─── Card hover — .tech-hover kept, flattened ────────────── */
-.tech-hover {
+/* ─── Cursor spotlight (pair with useSpotlight handler) ──── */
+.spotlight {
+  position: relative;
+}
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(43, 80, 224, 0.07),
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+@media (pointer: fine) {
+  .spotlight:hover::after { opacity: 1; }
+}
+
+/* ─── Card hover — .tech-hover kept as alias ─────────────── */
+.tech-hover,
+.em-hover {
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .tech-hover:hover,
 .em-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(3,10,20,0.55);
-  border-color: rgba(255,92,57,0.55) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(15,18,34,0.10);
+  border-color: #c9d3f5;
 }
 
-/* ─── Buttons — old names kept, blueprint styling ─────────── */
+/* ─── Buttons ────────────────────────────────────────────── */
 .btn-primary {
-  background: #ff5c39;
-  color: #071527;
-  border: 1px solid #ff5c39;
-  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #2b50e0;
+  color: #ffffff;
+  border: 1px solid #2b50e0;
+  border-radius: 999px;
   cursor: pointer;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Instrument Sans', sans-serif;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  letter-spacing: 0.005em;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .btn-primary:hover {
-  background: #ff7a5c;
-  border-color: #ff7a5c;
+  background: #1e3cb8;
+  border-color: #1e3cb8;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(255,92,57,0.3);
+  box-shadow: 0 10px 24px rgba(43,80,224,0.28);
 }
 
 .btn-ghost {
-  background: transparent;
-  border: 1px solid rgba(127,163,201,0.5);
-  border-radius: 2px;
-  color: #e6eef7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #d9deea;
+  border-radius: 999px;
+  color: #0f1222;
   cursor: pointer;
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Instrument Sans', sans-serif;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  letter-spacing: 0.005em;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .btn-ghost:hover {
-  border-color: #ff5c39;
-  color: #ff5c39;
-  background: rgba(255,92,57,0.06);
+  border-color: #2b50e0;
+  color: #2b50e0;
   transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(15,18,34,0.08);
 }
 
-/* ─── Figure Tag — .section-tag kept as alias ─────────────── */
+/* Press physics: buttons compress slightly under the click */
+.btn-primary:active,
+.btn-ghost:active,
+.btn-on-dark:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Skip link: hidden until keyboard-focused */
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 200;
+  transform: translateY(-200%);
+  background: #0f1222;
+  color: #fff;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Dark-band variants (contact / footer sit on ink) */
+.btn-on-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #0f1222;
+  border: 1px solid #ffffff;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.btn-on-dark:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+  background: #eef1ff;
+}
+
+/* ─── Eyebrow — .fig-tag/.section-tag kept as aliases ────── */
 .fig-tag,
-.section-tag {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
+.section-tag,
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #ff5c39;
-}
-
-/* ─── Title Block (drawing footer table) ─────────────────── */
-.title-block {
-  border: 1px solid rgba(127,163,201,0.3);
-}
-.title-block .tb-cell {
-  border: 1px solid rgba(127,163,201,0.18);
-  padding: 10px 14px;
-}
-.tb-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(127,163,201,0.8);
+  color: #2b50e0;
+}
+
+/* ─── Stack / tag chip ───────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: #566070;
+  background: #f2f4f9;
+  border: 1px solid #e6e8f0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+/* ─── Spec table — .title-block kept as alias ────────────── */
+.title-block {
+  border: 1px solid #e6e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+}
+.title-block .tb-cell {
+  border: 1px solid #eff1f6;
+  padding: 12px 16px;
+}
+.tb-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9aa2b8;
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 .tb-value {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  color: #e6eef7;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: #0f1222;
 }
 
 /* ─── Reduced Motion ─────────────────────────────────────── */

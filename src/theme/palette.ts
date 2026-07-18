@@ -1,36 +1,70 @@
 /**
- * Blueprint design system tokens.
- * The portfolio is styled as an engineering drawing: a deep drafting-blue
- * sheet, faded print linework, and a single "redline" markup accent.
+ * "Harbor" design system tokens — the commercial rebrand.
+ *
+ * A light, product-company system: porcelain ground, paper surfaces,
+ * deep ink text, and one confident cobalt accent (the blue of Sidi Bou
+ * Said doors). Each project supplies its own color inside its frame.
+ *
+ * NOTE: legacy key names (ground/field/print/trace/redline…) are kept as
+ * semantic aliases because older pages (AdminPanel) read them directly:
+ *   ground  = page background      field   = raised surface (paper)
+ *   print   = primary text (ink)   trace   = secondary text (slate)
+ *   redline = brand accent (cobalt)
  */
 export const COLORS = {
-  /** Drafting Blue — page ground (the blueprint sheet) */
-  ground: "#0B1E36",
-  /** Deep Field — recessed panels, code areas, modal scrims */
-  field: "#071527",
-  /** Print White — primary text and linework */
-  print: "#E6EEF7",
-  /** Trace Blue — annotations, dimension lines, muted text */
-  trace: "#7FA3C9",
-  /** Standard hairline border */
-  line: "rgba(127,163,201,0.28)",
-  /** Fainter hairline for internal dividers */
-  lineFaint: "rgba(127,163,201,0.16)",
-  /** Sheet grid texture */
-  gridLine: "rgba(127,163,201,0.10)",
-  /** Redline — THE accent (markup on engineering drawings) */
-  redline: "#FF5C39",
-  /** Lighter redline for hover states */
-  redlineBright: "#FF7A5C",
-  /** Translucent redline fill */
-  redlineSoft: "rgba(255,92,57,0.12)",
+  /** Page ground — porcelain */
+  ground: "#F6F7F9",
+  /** Raised surfaces — paper */
+  field: "#FFFFFF",
+  /** Primary text — ink */
+  print: "#0F1222",
+  /** Secondary text — slate */
+  trace: "#566070",
+  /** Hairline border */
+  line: "#E6E8F0",
+  /** Fainter internal divider */
+  lineFaint: "#EFF1F6",
+  /** Ultra-faint texture line */
+  gridLine: "#F0F2F7",
+  /** Brand accent — cobalt */
+  redline: "#2B50E0",
+  /** Accent hover — deep cobalt */
+  redlineBright: "#1E3CB8",
+  /** Translucent accent fill */
+  redlineSoft: "rgba(43,80,224,0.08)",
+
+  /* ── New-system names (preferred going forward) ── */
+  /** Page ground */
+  porcelain: "#F6F7F9",
+  /** Card / surface */
+  paper: "#FFFFFF",
+  /** Headlines, body text, dark band ground */
+  ink: "#0F1222",
+  /** Elevated surface on dark bands */
+  inkSoft: "#181C34",
+  /** Secondary text */
+  slate: "#566070",
+  /** Brand accent */
+  cobalt: "#2B50E0",
+  /** Brand accent, hover */
+  cobaltDeep: "#1E3CB8",
+  /** Translucent brand fill */
+  cobaltSoft: "rgba(43,80,224,0.08)",
+  /** Availability / success signal */
+  mint: "#0E9F6E",
+  /** Text on dark bands */
+  darkText: "#F3F5FA",
+  /** Muted text on dark bands */
+  darkMuted: "#9AA2B8",
+  /** Hairline on dark bands */
+  darkLine: "rgba(255,255,255,0.10)",
 } as const;
 
 export const FONTS = {
-  /** Archivo — display plate lettering (pair with fontStretch 125%, uppercase) */
-  display: "'Archivo', sans-serif",
-  /** IBM Plex Sans — body copy */
-  body: "'IBM Plex Sans', sans-serif",
-  /** IBM Plex Mono — annotations, labels, figure numbers */
-  mono: "'IBM Plex Mono', monospace",
+  /** Bricolage Grotesque — display headlines (tight leading, -2% tracking) */
+  display: "'Bricolage Grotesque', sans-serif",
+  /** Instrument Sans — body copy and UI */
+  body: "'Instrument Sans', sans-serif",
+  /** JetBrains Mono — labels, stack chips, code */
+  mono: "'JetBrains Mono', monospace",
 } as const;

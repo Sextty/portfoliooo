@@ -1,9 +1,9 @@
 # Portfolio Project — Complete Documentation
 
 ## 🎯 Goal
-Build a polished, animated portfolio website for **Wassim Jebali** (a.k.a. Sextty) to showcase developer projects, including a PHP e-commerce project (Girls Boutique).
+A commercial-grade portfolio platform for **Wassim Jebali** (a.k.a. Sextty). The pitch: every project is a complete product with a **live in-browser demo** — the site presents them the way a product company would.
 
-**Stack:** React 18 + Vite + TypeScript + Tailwind CSS 4 + shadcn/ui + Motion
+**Stack:** React 18 + Vite + TypeScript + Tailwind CSS 4 + Motion
 
 **Production:** https://portfoliowassim.vercel.app (Vercel, auto-deploys from master)
 
@@ -23,36 +23,39 @@ All routes except `/` are code-split via `React.lazy` + `Suspense` in `App.tsx`;
 
 ---
 
-## 🎨 Design System — "Blueprint / Schematic"
+## 🎨 Design System — "Harbor" (commercial rebrand, 2026-07-18)
 
-The portfolio is styled as an engineering drawing: a deep drafting-blue sheet, faded print linework, and a single "redline" markup accent. Tokens live in `src/theme/palette.ts` (`COLORS`, `FONTS`), mirrored into CSS vars in `src/styles/theme.css`.
+Light, product-company UI — porcelain ground, paper surfaces, ink text, one cobalt accent (the blue of Sidi Bou Said doors). Each project supplies its own color *inside* its product frame; the chrome around it stays disciplined. Tokens live in `src/theme/palette.ts` (`COLORS`, `FONTS`), mirrored into CSS vars in `src/styles/theme.css`.
 
 | Token | Value | Role |
 |-------|-------|------|
-| Drafting Blue | `#0B1E36` | page ground (blueprint sheet) |
-| Deep Field | `#071527` | recessed panels, code areas, modal scrims |
-| Print White | `#E6EEF7` | primary text / linework |
-| Trace Blue | `#7FA3C9` | annotations, dimension lines, muted text |
-| Redline | `#FF5C39` | THE accent — links, CTAs, active nav, stamps |
-| Girls Boutique accent | Pink (`#ec4899`) | the exhibited product keeps its own brand |
-| Card style | Flat drawing sheets (`.sheet`) — hairline borders, near-square corners (`--radius: 2px`), no blur/gradients/tilt |
-| Signature | `FIG. 01 — SYSTEM OVERVIEW` animated SVG schematic (`BlueprintSchematic.tsx`): CLIENT→API→DB strokes draw in, redline pulse travels the request path |
-| Structural devices | Drawing frame + corner ticks, `FIG. 0n` section labels, dimension-line dividers, title-block footer, mono field labels (`FIELD 01 — NAME`), rubber `OPEN TO WORK` stamp |
-| Fonts | Archivo (display, uppercase/wide), IBM Plex Sans (body), IBM Plex Mono (annotations/`.mono`) — loaded via `<link>` in `index.html` (preconnect + `display=swap`) |
-| A11y | `:focus-visible` redline outline, `prefers-reduced-motion` disables draw/pulse/entrance, Trace Blue is the minimum muted color (meets WCAG AA on the ground) |
+| Porcelain | `#F6F7F9` | page ground |
+| Paper | `#FFFFFF` | cards / raised surfaces |
+| Ink | `#0F1222` | headlines, body text, dark bands (contact panel) |
+| Slate | `#566070` | secondary text |
+| Line | `#E6E8F0` | hairline borders |
+| Cobalt | `#2B50E0` | THE accent — links, CTAs, eyebrows, focus rings (hover `#1E3CB8`) |
+| Mint | `#0E9F6E` | availability / success signal |
+| Project colors | per-project | live inside each product's mockup frame only |
+| Card style | White cards, `border-radius: 16px`, hairline borders, quiet shadows, 3px hover lift |
+| **Signature** | **`AppMockup.tsx` — every project renders as a CSS/SVG miniature of its actual UI (storefront, dashboard, chat, kanban, files, notes, fitness, polls) inside a `BrowserFrame`; the hero `LiveLauncher` auto-cycles them and launches the real demos** |
+| Fonts | Bricolage Grotesque (display, -2% tracking), Instrument Sans (body), JetBrains Mono (chips/labels/code) — loaded via `<link>` in `index.html` |
+| A11y | `:focus-visible` cobalt outline, `prefers-reduced-motion` respected (launcher auto-cycle disabled too), labeled form fields, dialog semantics in VideoModal |
+
+**Legacy-alias trick:** old blueprint class names (`.sheet`, `.glow-input`, `.fig-tag`, `.stamp`, `.title-block`, `.sheet-grid`, `.btn-primary`, `.btn-ghost`) and old `COLORS` keys (`ground/field/print/trace/redline`) still exist but resolve to Harbor values — that's how AdminPanel inherited the rebrand without a rewrite.
 
 ---
 
 ## 🔧 Key Features
 
-### 1. Animations & Scroll Effects
+### 1. Animations & Interactive Elements
+- **`AppMockup` + `BrowserFrame`** — the signature: parameterized miniature product UIs (8 variants + generic fallback), tinted per project color, with micro-life (typing dots, growing chart bars, live-pulse dots)
+- **`LiveLauncher`** (in PublicPortfolio) — hero browser frame that auto-cycles featured demos every 4.5s (paused on hover, disabled under reduced motion), with a tab switcher and a real "Launch demo" button
 - **`useActiveSection`** — IntersectionObserver hook that tracks which section is in view
-- **`ScrollProgress`** — fixed progress bar at top (useScroll + useSpring)
-- **`SectionDivider`** — dimension line between sections (hairline + end ticks + mono label), draws out on scroll
-- **`SectionEntrance`** — fade-up + slight scale wrapper for section entries
-- **`BlueprintSchematic`** — hero signature: animated SVG system diagram (replaces the old CodeTerminal, which was deleted)
-- **Navbar active section** — animated redline underline via `layoutId="nav-indicator"`
-- **Mobile nav** — hamburger toggle below `md` with animated dropdown (About / Projects / Contact / All Projects / Hire Me)
+- **`ScrollProgress`** — fixed cobalt progress bar at top (useScroll + useSpring)
+- **`SectionEntrance`** — fade-up wrapper for section entries
+- **Navbar active section** — cobalt dot indicator via `layoutId="nav-indicator"`; scrolled nav gets white blur + border
+- **Mobile nav** — hamburger toggle below `md` with animated dropdown (Work / What I do / About / All projects / Start a project)
 
 ### 2. Project System
 - **Committed source of truth:** `src/data/projects.json` (`{ version, projects[] }`) is baked into the build — it's what **every visitor on every device** sees. Edit it (or Admin → Export for Deploy), commit & push to publish.
@@ -60,7 +63,7 @@ The portfolio is styled as an engineering drawing: a deep drafting-blue sheet, f
 - **CRUD:** Full create/read/update/delete via Admin Panel (writes the local cache only — see "Publishing" below to push changes live)
 - **Default projects:** 8 seeded — Girls Boutique (in-portfolio demo) plus 7 standalone full-stack repos under github.com/Sextty: DevPulse, ChatFlow AI, CloudVault, TaskForge, SnapNote, FitTrack, PollWave (each a real app with docker-compose)
 - **Optional URLs:** `runUrl` and `githubUrl` are optional; buttons only render when URL exists
-- **`ProjectCard`** — shared "mini drawing sheet" card in `src/components/ProjectCard.tsx`, used by both PublicPortfolio (`appear="scroll"`) and ProjectZone (`appear="mount"`)
+- **`ProjectCard`** — shared product card in `src/components/ProjectCard.tsx` (AppMockup header on a tinted stage, tagline, stack chips, Case study link, Live demo pill), used by both PublicPortfolio (`appear="scroll"`) and ProjectZone (`appear="mount"`)
 - **Videos — two modes:**
   - *Baked-in (visible to everyone):* a file in `public/videos/<id>.mp4` referenced by the project's `videoUrl` = `/videos/<id>.mp4`. This is committed and deployed.
   - *Local upload (this browser only):* uploaded via Admin → stored in IndexedDB (`src/utils/videoDb.ts`), good for a quick preview. `ProjectCard`/`ProjectPreview` prefer the IndexedDB blob, else fall back to `videoUrl`.
@@ -129,8 +132,7 @@ Admin edits (and uploaded videos) live only in the editing browser until baked i
 |-------|--------|-------|
 | Admin edits don't auto-reach visitors | ℹ️ By design (no backend) | Edits/uploads are per-browser; publish via Admin → Export for Deploy → commit `src/data/projects.json` + `public/videos/*` → push (see §2a) |
 | Demo videos not yet recorded | ℹ️ Content | Projects link to real GitHub repos; add `videoUrl`/`runUrl` per project as demos are recorded |
-| Pre-existing lint errors | ⚠️ Pre-existing | ~18 errors in unused `src/components/ui/*` (react-refresh rule) and GirlsBoutique (`any` types); build unaffected |
-| `src/components/ui/*` unused | ℹ️ Note | shadcn scaffolding (~45 files) + many deps not imported by any page |
+| Pre-existing lint errors | ⚠️ Pre-existing | 11 errors in GirlsBoutique demo code (`any` types from sql.js rows, empty catch blocks, react-refresh); build unaffected |
 
 ---
 
@@ -149,33 +151,44 @@ npm run preview    # Preview production build locally
 
 ```
 src/
-├── App.tsx                          # Routes (lazy-loaded except landing)
+├── App.tsx                          # Routes (lazy-loaded except landing) + light RouteLoader
 ├── main.tsx                         # Entry point, global styles
 ├── pages/
-│   ├── PublicPortfolio.tsx          # Main portfolio page (navbar incl. mobile menu, hero, about, projects, contact, footer)
-│   ├── ProjectZone.tsx              # Full project directory
-│   ├── AdminPanel.tsx               # Admin CRUD dashboard
-│   ├── ProjectPreview.tsx           # Single project detail page
+│   ├── PublicPortfolio.tsx          # Landing composition (state, hash-scroll, skip link)
+│   ├── landing/                     # Landing sections: Navbar, HeroSection (LiveLauncher), StatsBand,
+│   │                                #   WorkSection, ServicesSection, PrinciplesSection, AboutSection,
+│   │                                #   ContactSection, Footer, LogoMark, SectionHeader
+│   ├── ProjectZone.tsx              # Catalog: search + category pills + tech chips + sort + empty state
+│   ├── AdminPanel.tsx               # Admin CRUD dashboard (rethemed via legacy-alias classes; list search)
+│   ├── ProjectPreview.tsx           # Product page (problem/solution, architecture, decisions, roadmap, CTA)
+│   ├── Demos/                       # In-browser demos for the 7 repo projects (own brands, shared DemoShell)
 │   └── GirlsBoutique/               # E-commerce demo (index.tsx = lazy route entry)
 ├── components/
-│   ├── ProjectCard.tsx              # Shared "mini drawing sheet" card
-│   ├── BlueprintSchematic.tsx       # Hero signature: animated SVG system diagram
-│   ├── VideoModal.tsx               # Accessible demo-video dialog
-│   ├── ScrollProgress.tsx           # Fixed redline scroll progress bar
-│   ├── SectionDivider.tsx           # Dimension-line section separator
-│   └── SectionEntrance.tsx          # Fade-up entrance wrapper
+│   ├── AppMockup.tsx                # SIGNATURE: miniature product UIs + BrowserFrame chrome
+│   ├── ArchitectureDiagram.tsx      # Animated client→services→data system diagram
+│   ├── ProjectCard.tsx              # Shared product card (mockup header + actions + spotlight)
+│   ├── Counter.tsx                  # In-view count-up (reduced-motion aware)
+│   ├── Magnetic.tsx                 # Magnetic CTA wrapper (fine pointers only)
+│   ├── VideoModal.tsx               # Accessible demo-video dialog (white chrome)
+│   ├── ScrollProgress.tsx           # Fixed cobalt scroll progress bar
+│   ├── SectionEntrance.tsx          # Fade-up entrance wrapper
+│   └── ImageWithFallback.tsx        # Img with error fallback
 ├── data/
-│   └── projects.json                # Committed source of truth ({version, projects[]}) — baked into build
+│   ├── projects.json                # Committed source of truth ({version, projects[]}) — baked into build
+│   ├── caseStudies.ts               # Per-project story content (problem/solution/architecture/decisions/roadmap)
+│   └── site.ts                      # Identity constants (email, GitHub, LinkedIn, production URL)
 ├── theme/
-│   └── palette.ts                   # Blueprint COLORS + FONTS tokens (imported by JSX)
+│   └── palette.ts                   # Harbor COLORS + FONTS tokens (legacy key names aliased)
 ├── utils/
 │   ├── projectDb.ts                 # Project interface + localStorage cache seeded from data/projects.json
 │   ├── videoDb.ts                   # IndexedDB blob storage for demo videos
+│   ├── color.ts                     # tint() hex→rgba helper
+│   ├── useSpotlight.ts              # Cursor-spotlight CSS-var handler (pairs with .spotlight)
 │   └── useActiveSection.ts          # IntersectionObserver hook
 └── styles/
     ├── index.css                    # Imports tailwind/theme/globals (fonts load in index.html)
-    ├── theme.css                    # Design tokens (blueprint CSS vars)
-    └── globals.css                  # Sheet/grid/frame/stamp/dimension utilities, buttons
+    ├── theme.css                    # Design tokens (Harbor CSS vars, product radii)
+    └── globals.css                  # Cards, buttons, chips, inputs, stamp, mockup keyframes (legacy names aliased)
 
 public/
 ├── og-image.png                     # 1200×630 social share image
@@ -198,3 +211,6 @@ public/
 | 2026-07-15 | **Upgrade pass:** shared ProjectCard (deduped ~280 lines ×2), mobile nav menu, mailto contact form + clickable contact links, route code-splitting (main JS 484→352 KB, boutique/admin/preview lazy), font loading via preconnect links, OG/Twitter meta + og-image + robots.txt + sitemap.xml, VideoModal a11y (Escape, dialog role, labels), fixed object-URL revoke leaks, fixed broken ESLint flat config |
 | 2026-07-15 | **Blueprint rebrand:** replaced indigo/emerald neon + glassmorphism with the engineering-drawing design system (drafting-blue sheet, redline accent, Archivo/IBM Plex, drawing frame, FIG labels, dimension lines, title-block footer); new `BlueprintSchematic` hero + `palette.ts`; removed CodeTerminal and all glass/tilt/shimmer/dot-grid; blueprint favicon + og-image. GirlsBoutique demo left on its own pink brand. |
 | 2026-07-15 | **Bake-in publishing pipeline:** moved project data to committed `src/data/projects.json` (`{version, projects}`, version-based cache refresh in `projectDb.ts`); added `public/videos/` for baked-in demo videos; Admin **Export for Deploy** (downloads `projects.json` + uploaded videos with `videoUrl` rewritten to `/videos/…`) and per-project **Download for deploy**, so admin changes can be committed and shown on every device. |
+| 2026-07-18 | **Demos v2 — every in-browser product upgraded (logic + UI + new interfaces):** DevPulse: Overview/Pipelines/Deploys tabs, 4w/8w/12w range switcher, live running pipeline with step progress, deploy log. ChatFlow: multi-room state with ambient teammate activity + unread badges, emoji reactions (bots react back), in-room search, room-info drawer. TaskForge: card editor modal (title/notes/label/assignee/priority), search + label filters, avatars & priority chips, In-Progress WIP-limit signal, board reset, v2 storage key with migration. CloudVault: storage quota meter, search + type filters, list/grid toggle, file-details modal (image preview, version history, share link, permissions). SnapNote: Write/Split/Preview modes, tag filter chips, trash with restore/delete-forever, .md export. FitTrack: Dashboard/History tabs, editable weekly goal ring with goal line on the chart, quick-add chips, personal records, 6-week training heatmap, day-grouped log. PollWave: live watching counter, LIVE/CLOSED status with close-poll flow + winner 🏆, per-poll details (vote-momentum sparkline + sorted breakdown), share links. Girls Boutique: SQL-backed catalog search page (LIKE across name/brand/description) + order-history page reading the orders/order_items tables; new navbar icons. |
+| 2026-07-18 | **v3.0 evolution pass:** case studies became full product pages — new `src/data/caseStudies.ts` (per-project problem/solution, architecture, engineering decisions, roadmap; neutral fallback for admin-added projects) + animated `ArchitectureDiagram` (client→services→data flow) + dark conversion CTA band. Catalog v2: category pills (Real-time/AI/Data/E-commerce/Productivity), technology chips, Featured/Newest sort, result count, premium empty state. Landing: split into `src/pages/landing/` modules; new "How I ship" principles section (workflow timeline + engineering values); count-up stats (`Counter`), cursor-spotlight cards (`useSpotlight` + `.spotlight`), magnetic hero CTA (`Magnetic`), button press physics, skip-to-content link, `/#hash` cross-route scrolling, `MotionConfig reducedMotion="user"`. Admin: list search with filtered count + clear-search empty state. SEO: JSON-LD Person+WebSite. Site identity constants in `src/data/site.ts`. |
+| 2026-07-18 | **Commercial platform redesign ("Harbor"):** full rebrand from dark blueprint to a light product-company system — porcelain/paper/ink + cobalt accent, Bricolage Grotesque/Instrument Sans/JetBrains Mono, 16px-radius cards, pill buttons, dark-ink contact band. New signature: `AppMockup.tsx` renders every project as a live CSS/SVG miniature of its actual UI inside a `BrowserFrame`; hero `LiveLauncher` auto-cycles featured demos and launches the real thing. Rewrote PublicPortfolio (stats band computed from project data, services section, multi-column footer), ProjectCard, ProjectZone, ProjectPreview (case-study layout, fixed self-corrupting code highlighter with placeholder tokenizer), VideoModal, RouteLoader. AdminPanel rethemed via legacy-alias classes + hex sweep. Deleted BlueprintSchematic/SectionDivider + shadcn `ui/` folder; pruned 6 unused deps (radix-dialog, cmdk, next-themes, sonner, tailwind-merge, clsx). New favicon, og-image, README, meta copy. |

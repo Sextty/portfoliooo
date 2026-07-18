@@ -16,11 +16,41 @@
   height: calc(100vh - 49px);
 }
 
+/* ChatFlow: quick-react bar appears on message hover (always on touch) */
+.cf-react-bar {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.cf-msg:hover .cf-react-bar,
+.cf-react-bar:focus-within {
+  opacity: 1;
+}
+@media (hover: none) {
+  .cf-react-bar {
+    opacity: 1;
+  }
+}
+
 /* CloudVault: files + activity feed */
 .demo-grid-cv {
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 20px;
+}
+
+/* SnapNote: split write/preview mode */
+.snap-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 900px) {
+  .snap-split {
+    grid-template-columns: 1fr;
+  }
+  .snap-split-btn {
+    display: none;
+  }
 }
 
 /* FitTrack: chart rows */
