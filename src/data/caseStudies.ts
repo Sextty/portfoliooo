@@ -44,6 +44,153 @@ export interface CaseStudy {
 }
 
 const CASE_STUDIES: Record<string, CaseStudy> = {
+  cadence: {
+    problem:
+      "Teams end up with a task board here, a calendar there, and chat somewhere else — no single place that actually understands their day, so every status update means switching tools and re-explaining context.",
+    solution:
+      "Cadence puts tasks, a calendar, and an AI assistant in one workspace, reachable through a ⌘K command palette that gets you anywhere in under a second. The assistant isn't decoration — asking it to \"create task: review PR\" actually adds the task to your board.",
+    architecture: {
+      client: { label: "React + TypeScript", sub: "Glassmorphism UI · ⌘K palette" },
+      services: [{ label: "Express API", sub: "REST · JWT auth" }],
+      stores: [{ label: "PostgreSQL", sub: "Prisma · tasks, events, users" }],
+      note: "The command palette and AI assistant both read and write the same task store — no separate mock data path.",
+    },
+    decisions: [
+      {
+        title: "Command palette as the front door",
+        body: "Keyboard-first navigation (⌘K) cuts the time between \"I know what I want\" and doing it — modeled on how Linear and Raycast treat search as the primary interface, not a fallback.",
+      },
+      {
+        title: "An assistant with real side effects",
+        body: "Chat commands parse into actual mutations — \"create task: X\" adds a real card to the board. An AI panel that can't change anything is just a FAQ with extra steps.",
+      },
+      {
+        title: "Optimistic everything",
+        body: "Dragging a card between columns updates the UI instantly; the API call confirms in the background. Latency should never sit between a user and a task they've already decided to move.",
+      },
+    ],
+    roadmap: [
+      { label: "Slack & email → task creation", status: "planned" },
+      { label: "Recurring tasks & reminders", status: "planned" },
+      { label: "Multi-workspace switching", status: "exploring" },
+    ],
+    features: [
+      "AI assistant with contextual replies and real task creation",
+      "Command palette (⌘K) with fuzzy search across pages and tasks",
+      "Kanban board with AI-suggested priority reordering",
+      "Week calendar with click-through event details",
+      "Full light/dark glassmorphism theming",
+      "Keyboard shortcuts panel (press ?)",
+    ],
+    codeFileName: "assistant.ts",
+    codeSnippet: `// Slash-style commands parse into real mutations, not just replies\nexport function handleAssistantMessage(text: string, ctx: WorkspaceContext) {\n  const createMatch = text.match(/^(create|add) task[:\\s]+(.+)/i);\n  if (createMatch) {\n    return ctx.tasks.create({ title: createMatch[2], status: "todo" });\n  }\n  return ctx.ai.reply(text, ctx.summary());\n}`,
+    setupSteps: [
+      "Clone the repository from GitHub",
+      "Run npm install in api/ and web/",
+      "Start PostgreSQL (or docker compose up --build)",
+      "Run prisma migrate dev to create the schema",
+      "Start the API and the Vite dev server",
+    ],
+  },
+
+  ledgerly: {
+    problem:
+      "Finance dashboards tend to oversimplify — a single balance number — or overwhelm with a raw bank export. Teams need the middle ground: real transactions, real budgets, and insights that don't require an analyst to interpret.",
+    solution:
+      "Ledgerly turns a transaction ledger into live dashboards: multi-account balances, a searchable and sortable transaction table with one-click CSV export, category budgets, and AI spending insights computed directly from the data — never hardcoded copy.",
+    architecture: {
+      client: { label: "React + TypeScript", sub: "Dark corporate dashboard" },
+      services: [{ label: "NestJS API", sub: "REST · aggregation queries" }],
+      stores: [{ label: "PostgreSQL", sub: "Prisma · accounts, transactions" }],
+      note: "Every insight card is a live aggregation over the transaction table — change the data and the copy changes with it.",
+    },
+    decisions: [
+      {
+        title: "Insights computed, not authored",
+        body: "Each \"AI insight\" is a month-over-month category delta or a max() query run against real transactions — not a template string. The feature can't drift out of sync with the data because it has no independent state.",
+      },
+      {
+        title: "Export mirrors the current view",
+        body: "CSV export serializes whatever the table is currently showing — the applied search, filter, and sort. There's no separate export endpoint to keep in sync with the UI.",
+      },
+      {
+        title: "Currency is a display concern",
+        body: "Stored amounts are currency-agnostic; the symbol shown is a Settings preference applied at render time, so switching currencies never touches a transaction record.",
+      },
+    ],
+    roadmap: [
+      { label: "Bank account linking (Plaid)", status: "planned" },
+      { label: "Multi-currency accounts", status: "exploring" },
+      { label: "Scheduled report emails", status: "planned" },
+    ],
+    features: [
+      "Multi-account dashboard with live balances",
+      "Searchable, sortable, paginated transaction table",
+      "One-click CSV export of the filtered, sorted view",
+      "Category budgets with over-limit highlighting",
+      "Monthly reports with category-breakdown donut chart",
+      "AI spending insights computed live from transaction data",
+    ],
+    codeFileName: "insights.ts",
+    codeSnippet: `// Month-over-month category delta — the "AI insight" is this query\nexport function topCategoryIncrease(txns: Txn[], thisMonth: string, lastMonth: string) {\n  const spend = (month: string) =>\n    groupBy(txns.filter(t => monthOf(t.date) === month && t.amount < 0), t => t.category);\n  const cur = spend(thisMonth), prev = spend(lastMonth);\n  return Object.entries(cur)\n    .map(([cat, amt]) => ({ cat, pct: pctChange(amt, prev[cat] ?? 0) }))\n    .sort((a, b) => b.pct - a.pct)[0];\n}`,
+    setupSteps: [
+      "Clone the repository from GitHub",
+      "Run npm install in api/ and web/",
+      "Start PostgreSQL (or docker compose up --build)",
+      "Run prisma migrate dev to create the schema",
+      "Start the NestJS API and the Vite dev server",
+    ],
+  },
+
+  aurawell: {
+    problem:
+      "Patients juggle phone calls and portals that don't talk to each other; doctors juggle spreadsheets and sticky notes for today's queue. Nobody has one shared source of truth for a visit.",
+    solution:
+      "Aurawell gives patients and doctors two purpose-built views over the same appointment data. Patients book visits through a guided flow, track their history, and message their care team; doctors see today's queue, a patient directory, and their schedule — one ledger, two perspectives.",
+    architecture: {
+      client: { label: "React + TypeScript", sub: "Patient portal · Doctor console" },
+      services: [{ label: "Express API", sub: "REST · JWT with role claims" }],
+      stores: [{ label: "PostgreSQL", sub: "Prisma · appointments, records" }],
+      note: "Patient and doctor dashboards are different queries and permissions over one appointments table — not two systems to reconcile.",
+    },
+    decisions: [
+      {
+        title: "One appointment table, two dashboards",
+        body: "There's no separate booking system for doctors versus patients — both views read and filter the same table by role, so a booked slot is instantly visible on both sides, correctly, by construction.",
+      },
+      {
+        title: "Booking as a guided flow, not a form",
+        body: "Specialty → doctor → time → reason, one decision per screen. Health-adjacent decisions shouldn't compete with a dozen fields fighting for attention at once.",
+      },
+      {
+        title: "Role-based authorization at the API",
+        body: "JWTs carry a role claim (patient/doctor); the API rejects cross-role reads server-side — the client-side role gate in the demo mirrors that boundary, it doesn't replace it.",
+      },
+    ],
+    roadmap: [
+      { label: "Video visit integration", status: "planned" },
+      { label: "Insurance & billing", status: "exploring" },
+      { label: "SMS appointment reminders", status: "planned" },
+    ],
+    features: [
+      "Multi-step appointment booking (specialty → doctor → time → reason)",
+      "Patient portal: history timeline, prescriptions, messaging",
+      "Doctor console: today's queue, patient directory, weekly schedule",
+      "Role-based JWT authentication (patient / doctor)",
+      "Live-feeling messaging thread between patient and doctor",
+      "Rounded, accessible, premium medical interface",
+    ],
+    codeFileName: "booking.ts",
+    codeSnippet: `// Reject a slot that's already booked for that doctor\nrouter.post("/api/appointments", requireAuth, async (req, res) => {\n  const { doctorId, date, time, reason } = req.body;\n  const clash = await prisma.appointment.findFirst({\n    where: { doctorId, date, time, status: "upcoming" },\n  });\n  if (clash) return res.status(409).json({ error: "Slot no longer available" });\n  const appt = await prisma.appointment.create({\n    data: { doctorId, date, time, reason, patientId: req.user.id, status: "upcoming" },\n  });\n  res.status(201).json(appt);\n});`,
+    setupSteps: [
+      "Clone the repository from GitHub",
+      "Run npm install in api/ and web/",
+      "Start PostgreSQL (or docker compose up --build)",
+      "Run prisma migrate dev to create the schema",
+      "Start the API and the Vite dev server",
+    ],
+  },
+
   "girls-boutique": {
     problem:
       "Small fashion retailers need a real store — catalog, cart, checkout, and a back office — without renting a SaaS platform they can't customize or afford.",

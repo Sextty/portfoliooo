@@ -9,6 +9,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://portfoliowassim.vercel.app/project/cadence</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/project/ledgerly</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/project/aurawell</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://portfoliowassim.vercel.app/project/girls-boutique</loc>
     <priority>0.6</priority>
   </url>
@@ -39,6 +51,18 @@
   <url>
     <loc>https://portfoliowassim.vercel.app/project/pollwave</loc>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/cadence</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/ledgerly</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://portfoliowassim.vercel.app/demo/aurawell</loc>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://portfoliowassim.vercel.app/girls-boutique</loc>

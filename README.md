@@ -10,10 +10,12 @@ A commercial-grade portfolio platform for a full-stack developer whose pitch is 
 - **Landing page** — hero with a live product launcher (auto-cycling miniature apps in a
   browser frame that launch the real demos), stats band, product grid, capabilities,
   about, contact.
-- **8 real products** — each with a full product page (problem, solution, animated
+- **11 real products** — each with a full product page (problem, solution, animated
   architecture diagram, engineering decisions, roadmap), GitHub repo, and an
   interactive in-browser demo — including a complete e-commerce store backed by an
-  in-browser SQLite database (sql.js).
+  in-browser SQLite database (sql.js), and three full SaaS-style platforms (an AI
+  workspace, a finance dashboard, a two-role healthcare app) each with a real
+  standalone Express + Prisma + PostgreSQL + JWT backend under `docker compose up`.
 - **Catalog** — searchable and filterable by category (real-time, AI, data,
   e-commerce, productivity) and by technology.
 - **App miniatures** — every project renders as a CSS/SVG miniature of its actual UI

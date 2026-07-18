@@ -692,6 +692,125 @@ function GenericMock({ color }: { color: string }) {
   );
 }
 
+/* ─── Variant: glass AI workspace (Cadence) ──────────────── */
+function GlassWorkspaceMock({ color }: { color: string }) {
+  const glass = {
+    background: "rgba(255,255,255,0.55)",
+    border: `1px solid ${tint(color, 0.18)}`,
+    backdropFilter: "blur(2px)",
+  };
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        background: `linear-gradient(150deg, ${tint(color, 0.22)}, ${tint(color, 0.06)})`,
+      }}
+    >
+      <div style={{ width: "19%", padding: "8% 4%", display: "flex", flexDirection: "column", gap: 9 }}>
+        <Dot size={10} color={color} />
+        <Bar w="76%" h={5} color={tint(color, 0.6)} style={{ ...glass, padding: "3px 0" }} />
+        <Bar w="64%" h={5} />
+        <Bar w="70%" h={5} />
+      </div>
+      <div style={{ flex: 1, padding: "5% 5.5%", display: "flex", flexDirection: "column", gap: "5%" }}>
+        <div style={{ borderRadius: 8, padding: "5% 6%", display: "flex", flexDirection: "column", gap: 6, ...glass }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <Dot size={9} color={color} />
+            <Bar w="40%" h={5} color={MK.barStrong} />
+          </div>
+          <Bar w="82%" h={4} color={MK.bar} />
+          <Bar w="55%" h={4} color={MK.barSoft} />
+        </div>
+        <div style={{ display: "flex", gap: "4%", flex: 1 }}>
+          {[0.5, 0.3, 0.4].map((a, i) => (
+            <div key={i} style={{ flex: 1, borderRadius: 8, padding: "5% 6%", display: "flex", flexDirection: "column", gap: 5, ...glass }}>
+              <Bar w="70%" h={4} color={tint(color, 0.7)} />
+              <Bar w="90%" h={10} color={tint(color, 0.15 + a * 0.3)} r={5} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Variant: finance ledger (Ledgerly) ─────────────────── */
+function LedgerMock({ color }: { color: string }) {
+  const bars = [0.4, 0.65, 0.3, 0.8, 0.55];
+  return (
+    <div style={{ position: "absolute", inset: 0, background: "#0c1220", padding: "6% 6.5%", display: "flex", flexDirection: "column", gap: "5%" }}>
+      <div style={{ display: "flex", gap: "3.5%" }}>
+        {[0.9, 0.5, -0.3].map((v, i) => (
+          <div key={i} style={{ flex: 1, background: "#131a2c", border: "1px solid #232c44", borderRadius: 7, padding: "5% 6%", display: "flex", flexDirection: "column", gap: 5 }}>
+            <Bar w="60%" h={4} color="#4b5573" />
+            <Bar w="75%" h={7} color={v < 0 ? "#f87171" : tint(color, 0.7)} />
+          </div>
+        ))}
+      </div>
+      <div style={{ flex: 1, background: "#131a2c", border: "1px solid #232c44", borderRadius: 7, padding: "5% 6%", display: "flex", flexDirection: "column" }}>
+        <Bar w="34%" h={4} color="#4b5573" style={{ marginBottom: "auto" }} />
+        <div style={{ display: "flex", alignItems: "flex-end", gap: "5%", height: "60%" }}>
+          {bars.map((b, i) => (
+            <div key={i} style={{ flex: 1, height: `${b * 100}%`, borderRadius: "3px 3px 1px 1px", background: i === 3 ? color : tint(color, 0.35 + b * 0.25) }} />
+          ))}
+        </div>
+      </div>
+      <div style={{ background: "#131a2c", border: "1px solid #232c44", borderRadius: 7, padding: "4% 6%", display: "flex", flexDirection: "column", gap: 5 }}>
+        {[0, 1].map((i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Dot size={6} color={tint(color, 0.5)} />
+            <Bar w={`${30 + i * 12}%`} h={4} color="#4b5573" />
+            <Bar w="14%" h={4} color={i === 0 ? "#4ade80" : "#4b5573"} style={{ marginLeft: "auto" }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Variant: care portal (Aurawell) ────────────────────── */
+function CareMock({ color }: { color: string }) {
+  return (
+    <div style={{ position: "absolute", inset: 0, background: "#fbfefc", padding: "6% 6.5%", display: "flex", flexDirection: "column", gap: "5%" }}>
+      <div
+        style={{
+          borderRadius: 9,
+          padding: "5% 6%",
+          background: `linear-gradient(120deg, ${color}, ${tint(color, 0.6)})`,
+          display: "flex",
+          flexDirection: "column",
+          gap: 5,
+        }}
+      >
+        <Bar w="42%" h={4.5} color="rgba(255,255,255,0.75)" />
+        <Bar w="62%" h={6} color="rgba(255,255,255,0.95)" />
+        <Bar w="30%" h={9} color="rgba(255,255,255,0.3)" r={999} />
+      </div>
+      <div style={{ display: "flex", gap: "4%" }}>
+        {[0, 1, 2].map((i) => (
+          <div key={i} style={{ flex: 1, background: "#fff", border: "1px solid #e3f0e9", borderRadius: 8, padding: "5% 4%", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+            <Bar w="60%" h={7} color={tint(color, 0.7)} />
+            <Bar w="80%" h={3.5} color="#cfe3da" />
+          </div>
+        ))}
+      </div>
+      <div style={{ flex: 1, background: "#fff", border: "1px solid #e3f0e9", borderRadius: 8, padding: "4% 5%", display: "flex", flexDirection: "column", gap: 6, justifyContent: "center" }}>
+        {[0, 1].map((i) => (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <Dot size={16} color={i === 0 ? color : tint(color, 0.45)} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 3, flex: 1 }}>
+              <Bar w="55%" h={4} color="#3f5850" />
+              <Bar w="35%" h={3.5} color="#cfe3da" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ─── Registry ───────────────────────────────────────────── */
 const VARIANTS: Record<string, (props: { color: string }) => ReactNode> = {
   "girls-boutique": StorefrontMock,
@@ -702,6 +821,9 @@ const VARIANTS: Record<string, (props: { color: string }) => ReactNode> = {
   snapnote: NotesMock,
   fittrack: FitnessMock,
   pollwave: PollsMock,
+  cadence: GlassWorkspaceMock,
+  ledgerly: LedgerMock,
+  aurawell: CareMock,
 };
 
 export function AppMockup({ projectId, color }: { projectId: string; color: string }) {

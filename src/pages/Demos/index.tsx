@@ -10,6 +10,9 @@ const registry: Record<string, LazyExoticComponent<ComponentType>> = {
   snapnote: lazy(() => import("./SnapNoteDemo")),
   fittrack: lazy(() => import("./FitTrackDemo")),
   pollwave: lazy(() => import("./PollWaveDemo")),
+  cadence: lazy(() => import("./CadenceDemo")),
+  ledgerly: lazy(() => import("./LedgerlyDemo")),
+  aurawell: lazy(() => import("./AurawellDemo")),
 };
 
 export default function DemoRoute() {

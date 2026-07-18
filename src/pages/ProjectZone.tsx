@@ -21,7 +21,7 @@ const CATEGORIES: { id: string; label: string; match: (p: Project) => boolean }[
   {
     id: "ai",
     label: "AI-powered",
-    match: (p) => hasTag(p, ["openai"]),
+    match: (p) => hasTag(p, ["openai"]) || /\bAI\b/.test(`${p.title} ${p.tagline} ${p.description}`),
   },
   {
     id: "data",

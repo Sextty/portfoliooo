@@ -1,6 +1,45 @@
 {
-  "version": 3,
+  "version": 4,
   "projects": [
+    {
+      "id": "cadence",
+      "title": "Cadence",
+      "tagline": "AI Workspace for Focused Teams",
+      "description": "A Notion AI / Linear-style productivity platform: kanban tasks, a week calendar, and an AI assistant that can summarize your day or create tasks from plain language. Full command palette (⌘K), keyboard shortcuts, and light/dark glassmorphism throughout.",
+      "tags": ["React", "TypeScript", "Node.js", "PostgreSQL", "Prisma", "JWT"],
+      "featured": true,
+      "color": "#7c6cf0",
+      "year": "2026",
+      "runUrl": "/demo/cadence",
+      "githubUrl": "https://github.com/Sextty/Cadence",
+      "videoUrl": ""
+    },
+    {
+      "id": "ledgerly",
+      "title": "Ledgerly",
+      "tagline": "Finance Analytics for Growing Teams",
+      "description": "A Stripe/Mercury-style finance dashboard: multi-account balances, a searchable and sortable transaction ledger with CSV export, category budgets, monthly reports, and AI spending insights computed live from the underlying data — not hardcoded.",
+      "tags": ["React", "TypeScript", "NestJS", "PostgreSQL", "Prisma", "JWT"],
+      "featured": true,
+      "color": "#3b82f6",
+      "year": "2026",
+      "runUrl": "/demo/ledgerly",
+      "githubUrl": "https://github.com/Sextty/Ledgerly",
+      "videoUrl": ""
+    },
+    {
+      "id": "aurawell",
+      "title": "Aurawell",
+      "tagline": "Care Coordination, Simplified",
+      "description": "A healthcare platform with two complete role-based experiences: a patient portal (booking, medical history timeline, prescriptions, messaging) and a doctor console (today's queue, patient directory, schedule) — sharing one multi-step appointment-booking flow.",
+      "tags": ["React", "TypeScript", "Express", "PostgreSQL", "Prisma", "JWT"],
+      "featured": true,
+      "color": "#059669",
+      "year": "2026",
+      "runUrl": "/demo/aurawell",
+      "githubUrl": "https://github.com/Sextty/Aurawell",
+      "videoUrl": ""
+    },
     {
       "id": "girls-boutique",
       "title": "Girls Boutique",
