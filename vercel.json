@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/((?!assets/|public/|sql-wasm.wasm).*)",
+      "source": "/((?!api/|assets/|public/|sql-wasm.wasm).*)",
       "destination": "/index.html"
     }
   ]

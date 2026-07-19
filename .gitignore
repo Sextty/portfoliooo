@@ -25,3 +25,10 @@ dist-ssr
 
 .vercel
 .claude/
+
+# env / secrets (never commit)
+.env
+.env.local
+.env.*.local
+
+.env*
